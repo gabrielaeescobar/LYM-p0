@@ -5,7 +5,8 @@ nltk.download('punkt')  # Descargar los recursos necesarios
 from nltk.tokenize import word_tokenize, sent_tokenize
 
 ###########################################         ABRIR ARCHIVO TXT
-def openFile(file_name: str)->list[str]:
+
+def openFile2(file_name: str)->list[str]:
     
     """    
     Args:
@@ -15,52 +16,17 @@ def openFile(file_name: str)->list[str]:
         lines (list[str]): lista con los str de cada linea del texto cargado (que es basicamente lo que hace el metodo <readlines()>)
     """
     file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_name+'.txt')
-    
+    lista = []
     with open(file_name, "r") as cmdFile:
-        linea = cmdFile.readlines()
-        linea.append("\n")                                                          # sin esto en la siguiente funcion no se imprimen todos los datos
-    return linea
-
-#print (openFile('codigo_correcto'))
-
-###########################################         PARA QUITARLE ESPACIOS, PONER TOOODO ELEGANTE
-###########################################         Y DEJAR LOS COMANDOS EN EL MISMO STR
-    
-def filterByCommand(lineas: list[str])->list[str]:
-
-    """
-    Args:
-        lines (list[str]): lista con los str de cada linea del texto cargado (que es basicamente lo que hace el metodo <readlines()>)
-
-    Returns:
-        list[str]: cada indice (str de la lista) es un comando :)
-    """
-    #lineas = openFile('codigo_correcto')
-    indice = 0                                                                      # primer indice de 'lineas'
-    indiceDelComando = indice + 1                                                   # segundo indice de 'lineas' // ultimo de cada comando
-    nuevaLista = []                                                                 # lista final
-    while (indiceDelComando < len(lineas)):
-
-        if (lineas[indiceDelComando] == "\n"):
-            strDelComando = ""                                                      #el comando <str> que se le va a añadir a la lista final
-
-            for numero in range(indice, indiceDelComando):                          #itera hasta tener todos los comandos del texto
-                strDelComando = strDelComando + lineas[numero]
-
-            if strDelComando != '':
-                nuevaLista.append(" ".join(strDelComando.split()))
-
-            indice = indiceDelComando
-            indiceDelComando = indice + 1
-
-        if (indiceDelComando < len(lineas) and lineas[indice]=="\n" and lineas[indiceDelComando] == "\n"):
-            indice += 2
-            indiceDelComando += 2
-
+        lineas = cmdFile.readlines()
+        texto = ''
+        for linea in lineas:
+            final = texto+ linea
+            texto = final
         
-        else:
-            indiceDelComando += 1
-    return nuevaLista
-print ('---------------------------------')
+                                                              # sin esto en la siguiente funcion no se imprimen todos los datos
+    return texto
 
-print(filterByCommand(openFile('codigo_correcto')))
+print (openFile2('codigo_correcto'))
+
+
