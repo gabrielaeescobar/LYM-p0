@@ -24,7 +24,6 @@ def openFile2(file_name: str)->list[str]:
             final = texto+ linea
             texto = final
         
-                                                              # sin esto en la siguiente funcion no se imprimen todos los datos
     return texto
 
 print (openFile2('codigo_correcto'))

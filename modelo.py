@@ -2,9 +2,12 @@ import nltk
 nltk.download('punkt') 
 
 from nltk.tokenize import word_tokenize, sent_tokenize
+import cargar 
 
 
-texto = " defVar nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c, b) { drop(c); letGo (b) ; walk(n) }"
+texto = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
+
+texto_prueba = " defVar nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c, b) { drop(c); letGo (b) ; walk(n) }"
 todo = sent_tokenize(texto)
 tokens = [word_tokenize(cadacosa) for cadacosa in todo]
 print("Tokens:", tokens)
