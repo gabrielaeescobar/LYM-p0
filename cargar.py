@@ -26,6 +26,6 @@ def openFile2(file_name: str)->list[str]:
         
     return texto
 
-print (openFile2('codigo_correcto'))
+#print (openFile2('codigo_correcto'))
 
 
