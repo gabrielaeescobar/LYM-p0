@@ -21,9 +21,13 @@ def openFile(file_name: str)->list[str]:
         linea.append("\n")                                                          # sin esto en la siguiente funcion no se imprimen todos los datos
     return linea
 
+#print (openFile('codigo_correcto'))
+
 ###########################################         PARA QUITARLE ESPACIOS, PONER TOOODO ELEGANTE
-###########################################         Y DEJAR TODOS LOS COMANDOS EN EL MISMO STR
+###########################################         Y DEJAR LOS COMANDOS EN EL MISMO STR
+    
 def filterByCommand(lineas: list[str])->list[str]:
+
     """
     Args:
         lines (list[str]): lista con los str de cada linea del texto cargado (que es basicamente lo que hace el metodo <readlines()>)
@@ -31,6 +35,7 @@ def filterByCommand(lineas: list[str])->list[str]:
     Returns:
         list[str]: cada indice (str de la lista) es un comando :)
     """
+    #lineas = openFile('codigo_correcto')
     indice = 0                                                                      # primer indice de 'lineas'
     indiceDelComando = indice + 1                                                   # segundo indice de 'lineas' // ultimo de cada comando
     nuevaLista = []                                                                 # lista final
@@ -48,8 +53,7 @@ def filterByCommand(lineas: list[str])->list[str]:
             indice = indiceDelComando
             indiceDelComando = indice + 1
 
-        
-        if (indiceDelComando < len(lineas) and lineas[indice]=="\n" and lineas[indiceDelComando] == "\n" and lineas[0] != 'd'):
+        if (indiceDelComando < len(lineas) and lineas[indice]=="\n" and lineas[indiceDelComando] == "\n"):
             indice += 2
             indiceDelComando += 2
 
@@ -57,6 +61,6 @@ def filterByCommand(lineas: list[str])->list[str]:
         else:
             indiceDelComando += 1
     return nuevaLista
-print(filterByCommand(openFile(input('file_name= '))))
 print ('---------------------------------')
-print (openFile(input('file_name= ')))
+
+print(filterByCommand(openFile('codigo_correcto')))
