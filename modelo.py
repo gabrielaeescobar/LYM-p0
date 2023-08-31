@@ -1,8 +1,7 @@
 import nltk
-nltk.download('punkt') 
-
 from nltk.tokenize import word_tokenize, sent_tokenize
 import cargar 
+nltk.download('punkt') 
 
 texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 texto = texto_carga.lower()
@@ -13,12 +12,6 @@ todo = sent_tokenize(texto)
 tokens = [word_tokenize(cadacosa) for cadacosa in todo]
 #print("Tokens:", tokens)
 
-#Comandos por cantidad de parametros
-
-comando_vacio = ["nop"]
-comando_solo_1 = ["turn","turnto","drop","get","grab","letGo", "facing","can","not"]
-comando_1_o_mas =[] 
-
 #Direcciones y orientaciones para comandos
 Directions = ['front', 'right', 'left', 'back']
 Orientations = ['north', 'south', 'west', 'east']
@@ -27,17 +20,16 @@ num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 
 # Funcion para defVar 
-
-# MIRAR SI LOS NOMBRES SE VUELVEN A USAR
+# HACER LO DE QUE LOS NOMBRES SE VUELVEN A USAR
 def check_defVar(tokens_):
     i = 0
     check = False
-    hubo = "no_hubo"
+    existe = False
     tokens = tokens_[0]
     while i < len(tokens):
         token = tokens[i]
         if token == "defvar":
-            hubo = "si_hubo"
+            existe = True
             nombre = tokens[i+1]
             valor = tokens[i+2]
             
@@ -47,21 +39,19 @@ def check_defVar(tokens_):
 
         i += 1
     
-    return check,hubo
+    return check,existe
 
-
-
-    #Funcion para defProc
+#Funcion para defProc
 def check_defProc(tokens_):
     i= 0
     tokens = tokens_[0]
     lista_nombres = []
     check = False
-    hubo = "no_hubo"
+    existe = False
     while i<len(tokens):
         token = tokens[i]
         if token == "defproc":
-            hubo = "si_hubo"
+            existe = True
             nombre = tokens[i+1]
             lista_nombres.append(nombre)
             parentesis_izquierdo = tokens[i+2]
@@ -77,20 +67,9 @@ def check_defProc(tokens_):
                     check = False
 
         i += 1
-    return check,hubo,lista_nombres    
+    return check,existe,lista_nombres    
 
-#def block_commands(tokens_)-> bool:
-     
-    """                    lista_nueva_tokens = []
-                    check_corchetes = dos_corchetes()
-                    if token"""
-                
-        
-print(check_defProc(tokens), "defproc")
-
-
-#COOOOOMAAANNNDDOOOOSSSSS
-
+#COMANDOS
 def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens_):
     '''
     PARAMETROS:
@@ -120,7 +99,6 @@ def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens_):
         
         i += 1
     return check, existe
-         
 
 def Jump (lista_variables_creadas, num, tokens_):
     i = 0
