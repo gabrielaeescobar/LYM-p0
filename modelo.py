@@ -6,9 +6,9 @@ nltk.download('punkt')
 texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 texto = texto_carga.lower()
 
-#texto_prueba = " defVar nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c, b) { drop(c); letGo (b) ; walk(n) }"
+texto_prueba = "defVar get(9) nop (1) nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c, b) { (0);  (9); turnTo(arriba)}"
 #texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
-todo = sent_tokenize(texto)
+todo = sent_tokenize(texto_prueba.lower())
 tokens = [word_tokenize(cadacosa) for cadacosa in todo]
 #print("Tokens:", tokens)
 
@@ -16,8 +16,8 @@ tokens = [word_tokenize(cadacosa) for cadacosa in todo]
 Directions = ['front', 'right', 'left', 'back']
 Orientations = ['north', 'south', 'west', 'east']
 num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-
-
+Comandos = ['walk', 'leap', 'jump', 'turn', 'turnto', 'drop', 'get','grab', 'letgo', 'nop']
+Condicion = ['facing', 'can', 'not']
 
 # Funcion para defVar 
 # HACER LO DE QUE LOS NOMBRES SE VUELVEN A USAR
@@ -70,6 +70,13 @@ def check_defProc(tokens_):
     return check,existe,lista_nombres    
 
 #COMANDOS
+'''
+Walk_Leap               FUNCIONA solo
+Jump                    FUNCIONA solo
+Turn                    FUNCIONA solo
+TurnTo                  FUNCIONA solo
+Drop_Get_Grab_LetGo     FUNCIONA solo
+Nop'''
 def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens_):
     '''
     PARAMETROS:
@@ -136,7 +143,7 @@ def TurnTo (Orientations, tokens_):
     existe = False
     tokens = tokens_[0]
     while i < len(tokens):
-        if tokens[i] == "turnto":
+        if (tokens[i] == "turnto"):
             existe = True
             if tokens[i+1] == '(' and (tokens[i+2] in Orientations) and tokens[i+3] == ')':
                 check = True
@@ -150,15 +157,16 @@ def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens_):
     check = False
     existe = False
     tokens = tokens_[0]
+    lista = ['drop', 'get','grab', 'letgo', 'nop']
     while i < len(tokens):
-        if (tokens[i] == "drop") or (tokens[i] == "get") or (tokens[i] == "grab") or (tokens[i] == "letgo"):
+        if (tokens[i] == lista[0]) or (tokens[i] == lista[1]) or (tokens[i] == lista[2]) or (tokens[i] == lista[3]) or (tokens[i] == lista[4]):
             existe = True
             if tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
                 check = True
             else:
                 check = False
         i += 1
-    return check, existe
+    return check, existe, tokens
 
 def Nop(tokens_):
     i = 0
@@ -174,3 +182,67 @@ def Nop(tokens_):
                 check = False
         i += 1
     return check, existe
+
+#CONDICIONES
+def Facing (Orientations, tokens_):
+    i = 0
+    check = False
+    existe = False
+    tokens = tokens_[0]
+    while i < len(tokens):
+        if(tokens[i] == "facing"):
+            existe = True
+            if tokens[i+1] == '(' and (tokens[i+2] in Orientations) and tokens[i+3] == ')':
+                check = True
+            else:
+                check = False
+        i += 1
+    return check, existe
+
+def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, tokens_):
+    i = 0
+    check = False
+    existe = False
+    tokens = tokens_[0]
+    while i < len(tokens):
+        if tokens[i] == "can":
+            existe = True
+            if tokens[i+1] == '(' and (tokens[i+2] in Comandos) and tokens[i+3] == ')':
+                if Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens) == (True, True) :
+                    check = True 
+                elif Jump (lista_variables_creadas, num, tokens) == (True, True) :
+                    check = True 
+                elif Turn (Directions, tokens)  == (True, True) :
+                    check = True 
+                elif TurnTo (Orientations, tokens) == (True, True) :
+                    check = True 
+                elif Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens) == (True, True) :
+                    check = True 
+                elif Nop(tokens_) == (True, True) :
+                    check = True 
+                else:
+                    check = False
+            else:
+                check = False
+        i += 1
+    return check, existe
+
+def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens_):
+    i = 0
+    check = False
+    existe = False
+    tokens = tokens_[0]
+    while i < len(tokens):
+        if tokens[i] == "can":
+            existe = True
+            if tokens[i+1] == '(' and (tokens[i+2] in Condiciones) and tokens[i+3] == ')':
+                if Can(Comandos, lista_variables_creadas, Directions, Orientations, num, tokens_) == (True, True):
+                    check = True
+                elif Facing (True, True):
+                    check = True
+                else:
+                    check = False
+        i += 1
+    return check, existe
+                
+#CONTROL STRUCTURES (condicionales)
