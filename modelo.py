@@ -21,6 +21,18 @@ num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 Comandos = ['walk', 'leap', 'jump', 'turn', 'turnto', 'drop', 'get','grab', 'letgo', 'nop']
 Condicion = ['facing', 'can', 'not']
 
+def correccionIndexOOR(element_to_check, position_to_check, Lista):
+    diga = (len(Lista)-1) - position_to_check
+    check = False
+    # position_to_check == 0, ultima posicion
+    # position_to_check == 1, penultima posicion, 
+    # etc...
+    if Lista[diga] == element_to_check:
+        check = True
+    else:
+        check = False
+    return check
+        
 # Funcion para defVar 
 ### HACER LO DE QUE LOS NOMBRES SE VUELVEN A USAR ###
 def check_defVar(tokens):
@@ -77,7 +89,6 @@ def check_defProc(tokens):
         i += 1
     return check,dict_nombres  
 
-
 #COMANDOS
 def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens):
     '''
@@ -95,8 +106,8 @@ def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens):
     check = False
     while i < len(tokens):
         if ((tokens[i] == "walk") or (tokens[i] == "leap")):
-            existe = True
             if tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
+                
                 check = True
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in Directions) or (tokens[i+4] in Orientations)) and tokens[i+5] == ')':
                 check = True
@@ -165,7 +176,11 @@ def Nop(tokens):
                 check = False
         i += 1
     return check
-
+'''
+Facing                  FUNCIONA solo
+Can                     FUNCIONA solo
+Not                     pendiente prueba
+'''
 def check_funciones_defProc(dict_nombres_proc, tokens):
     i = 0
     keys_dict_nombres_proc = dict_nombres_proc.keys()
