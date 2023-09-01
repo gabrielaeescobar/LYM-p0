@@ -3,15 +3,12 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 import cargar 
 nltk.download('punkt') 
 
-texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
-texto = texto_carga.lower()
+#texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
+#texto = texto_carga.lower()
 
-"""texto_prueba = "defVar get(9) nop (1) nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c, b) { (0);  (9); turnTo(arriba)}"
-#texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
-todo = sent_tokenize(texto_prueba.lower())"""
-texto_prueba = "defvar n 0 defproc goNorth() { while can ( walk (1 , north )) { walk (1, 3 , 4 , north ) }; putCB (1 ,1) } defproc hola (cara,de) { goNorth() }"
-#texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
-todo = sent_tokenize(texto_prueba)
+#texto_prueba = "defVar get(9) nop (1) nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c, b) { (0);  (9); turnTo(arriba)}"
+texto_prueba2 = "defProc goNorth() { while can(nop ()) { walk (1 , north ) }; putCB (1 ,1) } defProc facing (back)"
+todo = sent_tokenize(texto_prueba2.lower())
 tokens = [word_tokenize(cadacosa) for cadacosa in todo]
 #print("Tokens:", tokens)
 
@@ -76,7 +73,6 @@ def check_defProc(tokens_):
 
         i += 1
     return check,existe,dict_nombres  
-
 
 #COMANDOS
 '''
@@ -166,9 +162,9 @@ def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens_):
     check = False
     existe = False
     tokens = tokens_[0]
-    lista = ['drop', 'get','grab', 'letgo', 'nop']
+    lista = ['drop', 'get','grab', 'letgo']
     while i < len(tokens):
-        if (tokens[i] == lista[0]) or (tokens[i] == lista[1]) or (tokens[i] == lista[2]) or (tokens[i] == lista[3]) or (tokens[i] == lista[4]):
+        if (tokens[i] == lista[0]) or (tokens[i] == lista[1]) or (tokens[i] == lista[2]) or (tokens[i] == lista[3]):
             existe = True
             if tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
                 check = True
@@ -192,6 +188,11 @@ def Nop(tokens_):
         i += 1
     return check, existe
 
+'''
+Facing                  FUNCIONA solo
+Can
+Not
+'''
 #CONDICIONES
 def Facing (Orientations, tokens_):
     i = 0
@@ -216,25 +217,30 @@ def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, token
     while i < len(tokens):
         if tokens[i] == "can":
             existe = True
-            if tokens[i+1] == '(' and (tokens[i+2] in Comandos) and tokens[i+3] == ')':
-                if Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens) == (True, True) :
-                    check = True 
-                elif Jump (lista_variables_creadas, num, tokens) == (True, True) :
-                    check = True 
-                elif Turn (Directions, tokens)  == (True, True) :
-                    check = True 
-                elif TurnTo (Orientations, tokens) == (True, True) :
-                    check = True 
-                elif Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens) == (True, True) :
-                    check = True 
-                elif Nop(tokens_) == (True, True) :
-                    check = True 
+            if tokens[i+1] == '(' and (tokens[i+2] in Comandos):
+                sliced_tokens = []
+                sliced_tokens.append(tokens[i+2:])
+                nuevo_inico = tokens[i+2]
+                if (nuevo_inico == 'walk') or (nuevo_inico == 'leap'):
+                    check = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)[0]
+                elif (nuevo_inico == 'jump'):
+                    check = Jump (lista_variables_creadas, num, sliced_tokens)[0]
+                elif (nuevo_inico == 'turn'):
+                    check = Turn (Directions, sliced_tokens)[0] 
+                elif (nuevo_inico == 'turnto'):
+                    check = TurnTo (Orientations, sliced_tokens)[0]
+                elif (nuevo_inico == 'drop') or (nuevo_inico == 'get') or (nuevo_inico == 'grab') or (nuevo_inico == 'letgo'):
+                    check = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)[0]
+                elif (nuevo_inico == 'nop'):
+                    check = Nop(sliced_tokens)[0]
                 else:
                     check = False
             else:
                 check = False
         i += 1
     return check, existe
+# PENDIENTE / revisar como se va a comprobar el cierre de este parentesis
+print (Can(Comandos, ['x', 'putcb', 'y'], Directions, Orientations, num, tokens))
 
 def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens_):
     i = 0
@@ -242,18 +248,22 @@ def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comando
     existe = False
     tokens = tokens_[0]
     while i < len(tokens):
-        if tokens[i] == "can":
+        if tokens[i] == "not":
             existe = True
-            if tokens[i+1] == '(' and (tokens[i+2] in Condiciones) and tokens[i+3] == ')':
-                if Can(Comandos, lista_variables_creadas, Directions, Orientations, num, tokens_) == (True, True):
-                    check = True
-                elif Facing (True, True):
-                    check = True
+            if tokens[i+1] == '(' and (tokens[i+2] in Condiciones):
+                sliced_tokens = []
+                sliced_tokens.append(tokens[i+2:])
+                nuevo_inico = tokens[i+2]
+                if nuevo_inico == 'can':
+                    check = Can(Comandos, lista_variables_creadas, Directions, Orientations, num, sliced_tokens)[0]
+                elif nuevo_inico == 'facing':
+                    check = Facing (Orientations, sliced_tokens)[0]
                 else:
                     check = False
         i += 1
     return check, existe
-                
+# PENDIENTE / revisar como se va a comprobar el cierre de este parentesis
+
 #CONTROL STRUCTURES (condicionales)
         
 
@@ -294,16 +304,10 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
 list_variables_names_tupla = check_defVar(tokens)
 list_variables_names = list_variables_names_tupla[2]
 
-print(list_variables_names,"lol")
+
 
 dict_nombres_proc_tupla = check_defProc(tokens)
 dict_nombres_proc = dict_nombres_proc_tupla[2]
-
-print(dict_nombres_proc,"loool")
-
-
-print(blockCommands(dict_nombres_proc,list_variables_names,Directions,Orientations,num,tokens ), "ojala funcione")
-
 
 # falta implementar esta funcion en el defProc
 
