@@ -7,7 +7,7 @@ nltk.download('punkt')
 #texto = texto_carga.lower()
 
 #texto_prueba = "defVar get(9) nop (1) nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c, b) { (0);  (9); turnTo(arriba)}"
-texto_prueba2 = "defProc goNorth() { while can(nop ()) { walk (1 , north ) }; putCB (1 ,1) } defProc facing (back)"
+texto_prueba2 = "defProc goNorth() jump (1, 2) nop ( { while can(nop ()) { walk (1 , north ) }; putCB (1 ,1) } defProc "
 todo = sent_tokenize(texto_prueba2.lower())
 tokens = [word_tokenize(cadacosa) for cadacosa in todo]
 #print("Tokens:", tokens)
@@ -19,6 +19,18 @@ num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 Comandos = ['walk', 'leap', 'jump', 'turn', 'turnto', 'drop', 'get','grab', 'letgo', 'nop']
 Condicion = ['facing', 'can', 'not']
 
+def correccionIndexOOR(element_to_check, position_to_check, Lista):
+    diga = (len(Lista)-1) - position_to_check
+    check = False
+    # position_to_check == 0, ultima posicion
+    # position_to_check == 1, penultima posicion, 
+    # etc...
+    if Lista[diga] == element_to_check:
+        check = True
+    else:
+        check = False
+    return check
+        
 # Funcion para defVar 
 # HACER LO DE QUE LOS NOMBRES SE VUELVEN A USAR
 def check_defVar(tokens_):
@@ -103,6 +115,7 @@ def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens_):
         if ((tokens[i] == "walk") or (tokens[i] == "leap")):
             existe = True
             if tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
+                
                 check = True
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in Directions) or (tokens[i+4] in Orientations)) and tokens[i+5] == ')':
                 check = True
@@ -126,7 +139,6 @@ def Jump (lista_variables_creadas, num, tokens_):
                 check = False
         i += 1
     return check, existe
-
 def Turn (Directions, tokens_):
     i = 0
     check = False
@@ -171,7 +183,7 @@ def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens_):
             else:
                 check = False
         i += 1
-    return check, existe, tokens
+    return check, existe
 
 def Nop(tokens_):
     i = 0
@@ -187,11 +199,11 @@ def Nop(tokens_):
                 check = False
         i += 1
     return check, existe
-
+print (Nop (tokens))
 '''
 Facing                  FUNCIONA solo
-Can
-Not
+Can                     FUNCIONA solo
+Not                     pendiente prueba
 '''
 #CONDICIONES
 def Facing (Orientations, tokens_):
@@ -209,59 +221,55 @@ def Facing (Orientations, tokens_):
         i += 1
     return check, existe
 
-def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, tokens_):
+def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0
     check = False
-    existe = False
-    tokens = tokens_[0]
+    #tokens = tokens_[0]
     while i < len(tokens):
         if tokens[i] == "can":
-            existe = True
             if tokens[i+1] == '(' and (tokens[i+2] in Comandos):
-                sliced_tokens = []
-                sliced_tokens.append(tokens[i+2:])
+                sliced_tokens = tokens[i+2:]
                 nuevo_inico = tokens[i+2]
                 if (nuevo_inico == 'walk') or (nuevo_inico == 'leap'):
-                    check = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)[0]
+                    check = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)
                 elif (nuevo_inico == 'jump'):
-                    check = Jump (lista_variables_creadas, num, sliced_tokens)[0]
+                    check = Jump (lista_variables_creadas, num, sliced_tokens)
                 elif (nuevo_inico == 'turn'):
-                    check = Turn (Directions, sliced_tokens)[0] 
+                    check = Turn (Directions, sliced_tokens)
                 elif (nuevo_inico == 'turnto'):
-                    check = TurnTo (Orientations, sliced_tokens)[0]
+                    check = TurnTo (Orientations, sliced_tokens)
                 elif (nuevo_inico == 'drop') or (nuevo_inico == 'get') or (nuevo_inico == 'grab') or (nuevo_inico == 'letgo'):
-                    check = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)[0]
+                    check = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)
                 elif (nuevo_inico == 'nop'):
-                    check = Nop(sliced_tokens)[0]
+                    check = Nop(sliced_tokens)
                 else:
                     check = False
+                    
+                if nuevo_inico == ')' or check == False:
+                    break
             else:
                 check = False
         i += 1
-    return check, existe
+    return check
 # PENDIENTE / revisar como se va a comprobar el cierre de este parentesis
-print (Can(Comandos, ['x', 'putcb', 'y'], Directions, Orientations, num, tokens))
+#print (Can(Comandos, ['x', 'putcb', 'y'], Directions, Orientations, num, tokens))
 
-def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens_):
+def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens):
     i = 0
     check = False
-    existe = False
-    tokens = tokens_[0]
     while i < len(tokens):
         if tokens[i] == "not":
-            existe = True
             if tokens[i+1] == '(' and (tokens[i+2] in Condiciones):
-                sliced_tokens = []
-                sliced_tokens.append(tokens[i+2:])
+                sliced_tokens= tokens[i+2:]
                 nuevo_inico = tokens[i+2]
                 if nuevo_inico == 'can':
-                    check = Can(Comandos, lista_variables_creadas, Directions, Orientations, num, sliced_tokens)[0]
+                    check = Can(Comandos, lista_variables_creadas, Directions, Orientations, num, sliced_tokens)
                 elif nuevo_inico == 'facing':
-                    check = Facing (Orientations, sliced_tokens)[0]
+                    check = Facing (Orientations, sliced_tokens)
                 else:
                     check = False
         i += 1
-    return check, existe
+    return check
 # PENDIENTE / revisar como se va a comprobar el cierre de este parentesis
 
 #CONTROL STRUCTURES (condicionales)
