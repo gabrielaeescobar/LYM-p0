@@ -1,12 +1,14 @@
 import nltk
-from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.tokenize import word_tokenize, sent_tokenize, regexp_tokenize
 import cargar 
 nltk.download('punkt') 
 
-texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
-texto = texto_carga.lower()
+###ARREGLAR TOKENIZADOR###
 
-texto_prueba = "defvar n 0 defproc goNorth()  { walk (1, north) }"
+#texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
+#texto = texto_carga.lower()
+
+texto_prueba = "defvar n 0 defproc goNorth() {jump ( 1 , 2 )} "
 #texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
 
 tokens = word_tokenize(texto_prueba)
@@ -57,12 +59,18 @@ def check_defProc(tokens):
                 if continuacion == ")": # primer caso 0 parametros
                     check = True
                     dict_nombres[nombre] = [tokens[i+2],continuacion]
+                    longitud_l = len(dict_nombres[nombre])
+                    dict_nombres[nombre] = longitud_l
                 elif isinstance(continuacion,str) and tokens[i+4] == ")": # segundo caso 1 parametro
                     check = True
-                    dict_nombres[nombre] = [tokens[i+2],continuacion,tokens[i+4]]
+                    dict_nombres[nombre] = len[tokens[i+2],continuacion,tokens[i+4]]
+                    longitud_l = len(dict_nombres[nombre])
+                    dict_nombres[nombre] = longitud_l
                 elif isinstance(continuacion,str) and tokens[i+4] == "," and isinstance(tokens[i+5],str) and tokens[i+6] == ")": # tercer caso 2 parametros
                     check = True
-                    dict_nombres[nombre] = [tokens[i+2],continuacion,tokens[i+4],tokens[i+5],tokens[i+5]]
+                    dict_nombres[nombre] = len[tokens[i+2],continuacion,tokens[i+4],tokens[i+5],tokens[i+5]]
+                    longitud_l = len(dict_nombres[nombre])
+                    dict_nombres[nombre] = longitud_l
                 else:
                     check = False
 
@@ -157,7 +165,21 @@ def Nop(tokens):
                 check = False
         i += 1
     return check
-        
+
+def check_funciones_defProc(dict_nombres_proc, tokens):
+    i = 0
+    keys_dict_nombres_proc = dict_nombres_proc.keys()
+    values_dict_nombres_proc = dict_nombres_proc.values()
+    #estructura que lleva 1 parametro
+    while i < len(tokens):
+        for key in keys_dict_nombres_proc:
+            if tokens[i] == key and dict_nombres_proc[key] == 2:
+                tokens
+
+
+    #estructura que lleva 2 parametros
+    #estructura que lleva 3 parametros   
+    return 0  
 
 def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0 
@@ -165,31 +187,41 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
     values_dict_nombres_proc = dict_nombres_proc.values()
     keys_dict_nombres_proc = dict_nombres_proc.keys()
     print(keys_dict_nombres_proc,"what")
+    print(values_dict_nombres_proc,"que")
     while i < len(tokens):
         if tokens[i] == "{":  ## debe hacerse con slize [i+1]
+            print (tokens[i+1:])
+            if tokens[i+1] == "walk" or tokens[i+1] == "leap":
+                check = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens[i:])
 
-                if tokens[i+1] == "walk" or tokens[i+1] == "leap":
-                    check = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens[i:])
+            elif tokens[i+1] == "jump":
+                check = Jump (lista_variables_creadas, num,  tokens[i+1:])
 
-                elif tokens[i+1] == "jump":
-                    check = Jump (lista_variables_creadas, num, tokens)
-                elif tokens[i+1] == "turn":
-                    check = Turn (Directions, tokens) 
-                elif tokens[i+1] == "turnto" :
-                    check = TurnTo (Orientations, tokens) 
-                elif  tokens[i+1] == "drop" or tokens[i] == "get" or tokens[i] == "grab" or tokens[i] == "letgo"  :
-                    check = Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens) 
-                elif tokens[i+1] == "nop" :
-                    check = Nop(tokens)
-                #if tokens[i+2] in keys_dict_nombres_proc:
-                    #if tokens[i+1] == dict_nombres_proc[tokens[i+1]]: 
-                    check = True 
-                if tokens[i] == "}" or check == False:
-                    break
+            elif tokens[i+1] == "turn":
+                check = Turn (Directions,  tokens[i:]) 
+
+            elif tokens[i+1] == "turnto" :
+                check = TurnTo (Orientations,  tokens[i:]) 
+
+            elif  tokens[i+1] == "drop" or tokens[i+1] == "get" or tokens[i+1] == "grab" or tokens[i+1] == "letgo" :
+                check = Drop_Get_Grab_LetGo (lista_variables_creadas, num,  tokens[i:]) 
+
+            elif tokens[i+1] == "nop" :
+                check = Nop( tokens[i:])
+            #if tokens[i+2] in keys_dict_nombres_proc:
+                #if tokens[i+1] == dict_nombres_proc[tokens[i+1]]: 
+                check = True 
+
+            if (tokens[i+1] != "}" and tokens[i+1] not in ['defvar', 'n', '0', 'defproc', 'goNorth', '(', ')', '{', 'jump', '(', '1', ',', '2', ')']) or (check == False) :
+                check = False
+            else:
+                break
+        
         i+=1
         print(tokens[i-1])
     return check
-#me falta la coma
+###COMAAAAAA###
+#arreglar { que si no entra siempre va a ser true 
 
 list_variables_names_tupla = check_defVar(tokens)
 list_variables_names = list_variables_names_tupla[1]
