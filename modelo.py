@@ -3,17 +3,18 @@ from nltk.tokenize import word_tokenize, sent_tokenize, regexp_tokenize
 import cargar 
 nltk.download('punkt') 
 
-###ARREGLAR TOKENIZADOR###
-
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = "defvar n 0 defproc goNorth() turn(north) {jump ( 1 , 2 )} turn(right"
-texto_prueba2 = " can ( nop () ) can (turnto(north))"
-tokens = word_tokenize(texto_prueba2)
-#print(tokens,"estos son los tokens")
+texto_prueba = "{walk(1); walk (3,front); walk(2,north)}"
+#texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
 
-#Direcciones y orientaciones para comandos y condiciones
+pattern = r'\w+|[.,(){}\[\]]|\S+'
+#pattern = r'\w+|,'
+tokens = regexp_tokenize(texto_prueba, pattern)
+print(tokens,"estos son los tokens")
+
+#Direcciones y orientaciones para comandos
 Directions = ['front', 'right', 'left', 'back']
 Orientations = ['north', 'south', 'west', 'east']
 num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -356,59 +357,81 @@ def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comando
 
 def check_funciones_defProc(dict_nombres_proc, tokens):
     i = 0
+    check = True
     keys_dict_nombres_proc = dict_nombres_proc.keys()
-    values_dict_nombres_proc = dict_nombres_proc.values()
-    #estructura que lleva 1 parametro
+
     while i < len(tokens):
         for key in keys_dict_nombres_proc:
             if tokens[i] == key and dict_nombres_proc[key] == 2:
-                tokens
+                if not (tokens[i+1] == '(' and tokens[i+2] == ')'): #estructura que lleva 1 parametro
+                    check = False
 
+            elif tokens[i] == key and dict_nombres_proc[key] == 3:
+                if not (tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')'):     #estructura que lleva 2 parametros
+                    check = False
 
-    #estructura que lleva 2 parametros
-    #estructura que lleva 3 parametros   
-    return 0  
+            elif tokens[i] == key and dict_nombres_proc[key] == 4:
+                if not(tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in Directions) or (tokens[i+4] in Orientations)) and tokens[i+5] == ')'):   #estructura que lleva 3 parametros 
+                    check = False
+
+        i += 1  
+    return check, tokens[i:]
+dict_nombres_proc = (check_defProc(tokens))[1]
+lista_variables_creadas = (check_defVar(tokens))[1]
 
 def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0 
     check = True
-    values_dict_nombres_proc = dict_nombres_proc.values()
+    se_cerro_corchete = False
+    se_abrio_corchete = False
     keys_dict_nombres_proc = dict_nombres_proc.keys()
-    #print(keys_dict_nombres_proc,"what")
-    #print(values_dict_nombres_proc,"que")
-    while i < len(tokens):
-        if tokens[i] == "{":  ## debe hacerse con slize [i+1]
-            if tokens[i+1] == "walk" or tokens[i+1] == "leap":
-                check = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens[i:])
 
-            elif tokens[i+1] == "jump":
-                check = Jump (lista_variables_creadas, num,  tokens[i+1:])
-
-            elif tokens[i+1] == "turn":
-                check = Turn (Directions,  tokens[i:]) 
-
-            elif tokens[i+1] == "turnto" :
-                check = TurnTo (Orientations,  tokens[i:]) 
-
-            elif  tokens[i+1] == "drop" or tokens[i+1] == "get" or tokens[i+1] == "grab" or tokens[i+1] == "letgo" :
-                check = Drop_Get_Grab_LetGo (lista_variables_creadas, num,  tokens[i:]) 
-
-            elif tokens[i+1] == "nop" :
-                check = Nop( tokens[i:])
-            
-            if i not in Comandos:
-                
-            #if tokens[i+2] in keys_dict_nombres_proc:
-                #if tokens[i+1] == dict_nombres_proc[tokens[i+1]]: 
-                check = True 
-
-            if (tokens[i+1] != "}" and tokens[i+1] not in ['defvar', 'n', '0', 'defproc', 'goNorth', '(', ')', '{', 'jump', '(', '1', ',', '2', ')']) or (check == False) :
-                check = False
-            else:
-                break
-        
+    if tokens[i] == "{":  ## debe hacerse con slize [i+1]
+        se_abrio_corchete = True
         i+=1
-        #print(tokens[i-1])
+        while i < len(tokens) :
+            print ("tOKEN IS ", tokens[i])
+            if tokens[i] == "walk" or tokens[i] == "leap":
+                print(f'Voy a entrar a walk con { tokens[i:]}')
+                check, tokens, _ = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens[i:])
+                i=0  
+
+            elif tokens[i] == "jump":
+                check, tokens, _ = Jump (lista_variables_creadas, num,  tokens[i:])
+                i=0
+            elif tokens[i] == "turn":
+                check, tokens, _ = Turn (Directions,  tokens[i:]) # Recibimos el check y el nuevo slice de tokens
+                i=0
+            elif tokens[i] == "turnto" :
+                check, tokens, _ = TurnTo (Orientations,  tokens[i:]) 
+                i=0
+            elif  tokens[i] == "drop" or tokens[i] == "get" or tokens[i] == "grab" or tokens[i] == "letgo" :
+                check , tokens,_ = Drop_Get_Grab_LetGo (lista_variables_creadas, num,  tokens[i:]) 
+                i=0
+
+            elif tokens[i] == "nop" :
+                check , tokens, _ = Nop( tokens[i:])
+                i=0
+            elif tokens[i] in keys_dict_nombres_proc: 
+                check, tokens, _ = check_funciones_defProc(dict_nombres_proc, tokens, lista_variables_creadas) 
+                i=0
+
+            if (check == False)  or (tokens[i] == "}") :
+                print(f'breakie con check igual a {check} y mis tokens a actuales son {tokens}')
+                break
+                
+            elif ( tokens[i] != ";"):
+                check = False
+                print(tokens[i], '  because of this')
+                break
+
+            i+=1
+        if tokens[i] == "}":
+            se_cerro_corchete = True
+                
+       
+    
+    check = check and se_cerro_corchete and se_abrio_corchete
     return check
 
 ###COMAAAAAA###
@@ -426,3 +449,4 @@ dict_nombres_proc = dict_nombres_proc_tupla[1]
 #### recorro la lista de cada nombre y tiene que ser igual a la estructura que es correcta, mirar cantidad parametros ###
 
 ### CAMBIAR EL IS INSTANCE POR UNA FUNCION AUXILIAR QUE RECORRA CADA CADENA DEL NOMBRE ###
+print(blockCommands(dict_nombres_proc,list_variables_names,Directions,Orientations,num,tokens ), "ojala funcione")
