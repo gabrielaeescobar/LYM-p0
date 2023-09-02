@@ -6,7 +6,7 @@ nltk.download('punkt')
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = "{walk(1); jump (3 ,4); walk(2,north); turn(front); get(1); leap(1,left); nop() }" # solo mira brackets
+texto_prueba = "{(walk(1)); can(jump (3 ,9)); walk(2,north); turn(front); get(1); leap(1,left)}" # solo mira brackets
 #texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
 
 pattern = r'\w+|[.,(){}\[\]]|\S+'
@@ -35,27 +35,6 @@ def correccionIndexOOR(element_to_check, position_to_check, Lista):
         check = False
     return check, pos
 
-def CanEnComandos(pos, num_parametros: int):
-    check_Can = None
-    sliced_tok = []
-    if num_parametros == 1:
-        sliced_tok = tokens[pos+4:]
-    elif num_parametros == 2:
-        sliced_tok = tokens[pos+6:]
-    elif num_parametros == 0:
-        sliced_tok = tokens[pos+3:]
-        
-    if (correccionIndexOOR(tokens[pos], (len(tokens)- 1), tokens)[0] == False) and (correccionIndexOOR(tokens[pos], (len(tokens)-2), tokens)[0] == False):      
-        if tokens[pos-2] == 'can':
-            if tokens[pos-1] == '(':    
-                if sliced_tok != [] and sliced_tok[0] == ')':
-                    check_Can = True
-                else:
-                    check_Can = False
-            else:
-                check_Can = False
-    
-    return check_Can
 
 # Funcion para defVar 
 ### HACER LO DE QUE LOS NOMBRES SE VUELVEN A USAR ###
@@ -162,7 +141,7 @@ def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens):
                 
 
         i+=1
-
+#print(Walk_Leap([], Directions, Orientations, num, tokens))
 def Jump (lista_variables_creadas, num, tokens):
     i = 0
     checkCan = None
@@ -209,22 +188,14 @@ def TurnTo (Orientations, tokens):
                 return False, tokens[i:], checkCan
                 
             elif (correccionIndexOOR('turnto', 3, tokens) == (True, i)) and tokens[i+1] == '(' and (tokens[i+2] in Orientations) and tokens[i+3] == ')':
-                checkCan =CanEnComandos(i, 1)
-                if checkCan != True:
-                    return False, tokens[i:], checkCan
-                    
                 return True, tokens[i+4:], checkCan
                 
             elif tokens[i+1] == '(' and (tokens[i+2] in Orientations) and tokens[i+3] == ')':
-                checkCan =CanEnComandos(i, 1)
-                if checkCan != True:
-                    return False, tokens[i:], checkCan
-                    
                 return True, tokens[i+4:], checkCan
                 
             else:
                 return False, tokens[i:], checkCan
-                break
+                
         i += 1
 
 def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens):
@@ -236,23 +207,15 @@ def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens):
                 return False, tokens[i:], checkCan
                 
             elif (correccionIndexOOR(tokens[i], 3, tokens) == (True, i)) and tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
-                checkCan =CanEnComandos(i, 1) 
-                if checkCan != True:
-                    return False, tokens[i:], checkCan
-                    
                 return True, tokens[i+4:], checkCan
                 
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
-                checkCan =CanEnComandos(i, 1) 
-                if checkCan != True:
-                    return False, tokens[i:], checkCan
                 return True, tokens[i+4:], checkCan
                 
             else:
                 return False
                 
         i+= 1
-        
 def Nop(tokens):
     i = 0
     checkCan = None
@@ -261,23 +224,15 @@ def Nop(tokens):
             if correccionIndexOOR('nop', 0, tokens)[0] == True or correccionIndexOOR('nop', 1, tokens)[0]== True:
                 return False, tokens[i:], checkCan
                 
-            elif correccionIndexOOR('nop', 2, tokens) == (True, i) and tokens[i+1] == '(' and tokens[i+2] == ')':
-                checkCan =CanEnComandos(i, 0) 
-                if checkCan != True:
-                    return False, tokens[i:], checkCan
-                    
+            elif correccionIndexOOR('nop', 2, tokens) == (True, i) and tokens[i+1] == '(' and tokens[i+2] == ')':    
                 return True, tokens[i+3:], checkCan
             
             elif tokens[i+1] == '(' and tokens[i+2] == ')':
-                checkCan =CanEnComandos(i, 0) 
-                if checkCan != True:
-                    return False, tokens[i:], checkCan
-                    
                 return True, tokens[i+3:], checkCan
             else:
                 return False, tokens[i:], checkCan
         i += 1
-
+print (Nop(tokens), '///////////////////////////')
 #CONDICIONES
 def Facing (Orientations, tokens):
     i = 0
@@ -298,44 +253,54 @@ def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, token
     i = 0
     check = False
     while i < len(tokens):
-        
+
         if tokens[i] == "can":
+            
+            j = i+1
             if (correccionIndexOOR('can', 0, tokens)[0] == True) or (correccionIndexOOR('can', 1, tokens)[0]== True) or (correccionIndexOOR('can', 2, tokens)[0] == True):
-                check == False
-                break
-            elif tokens[i+1] == '(':
-                if (tokens[i+2] in Comandos):
-                    sliced_tokens = (tokens[i:])
-                    nuevo_inico = tokens[i+2]
-                    if (nuevo_inico == 'walk') or (nuevo_inico == 'leap'):
-                        check, _, checkCan = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)
-                    elif (nuevo_inico == 'jump'):
-                        check, _, checkCan = Jump (lista_variables_creadas, num, sliced_tokens)
-                    elif (nuevo_inico == 'turn'):
-                        check, _, checkCan = Turn (Directions, sliced_tokens)
-                    elif (nuevo_inico == 'turnto'):
-                        check, _, checkCan = TurnTo (Orientations, sliced_tokens)
-                        if checkCan!= True or check != True:
+                return False
+            while j < len(tokens[i+1:]):
+                if tokens[j] =='(':
+                    if (tokens[j+1] in Comandos):
+                        sliced_tokens = (tokens[j:])
+                        nuevo_inico = tokens[j+1]
+                        if (nuevo_inico == 'walk') or (nuevo_inico == 'leap'):
+                            check=Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)[0]
+                            sliced_sliced = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)[1]
+                        elif (nuevo_inico == 'jump'):
+                            check= Jump (lista_variables_creadas, num, sliced_tokens)[0]
+                            sliced_sliced = Jump (lista_variables_creadas, num, sliced_tokens)[1]
+                        elif (nuevo_inico == 'turn'):
+                            check= Turn (Directions, sliced_tokens)[0]
+                            sliced_sliced = Turn (Directions, sliced_tokens)[1]
+                        elif (nuevo_inico == 'turnto'):
+                            check = TurnTo (Orientations, sliced_tokens)[0]
+                            sliced_sliced = TurnTo (Orientations, sliced_tokens)[1]
+                        elif (nuevo_inico == 'drop') or (nuevo_inico == 'get') or (nuevo_inico == 'grab') or (nuevo_inico == 'letgo'):
+                            check = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)[0]
+                            sliced_sliced = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)[1]
+                        elif (nuevo_inico == 'nop'):
+                            check= Nop(sliced_tokens)[0]
+                            sliced_sliced = Nop(sliced_tokens)[1]
+                            
+                        else:
                             check = False
-                            break
-                    elif (nuevo_inico == 'drop') or (nuevo_inico == 'get') or (nuevo_inico == 'grab') or (nuevo_inico == 'letgo'):
-                        check, _, checkCan = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)
-                        if checkCan != True or check != True:
-                            check = False
-                            break
-                    elif (nuevo_inico == 'nop'):
-                        check, _, checkCan = Nop(sliced_tokens)
-                        if checkCan != True or check != True:
-                            check = False
-                            break
-                    else:
-                        check = False
-            else:
-                check = False
-                break
+                            
+                        if check != True or sliced_sliced[0] != ')':
+                            return False
+                        else:
+                            return True
+                        
+                    
+                else:
+                    return False
+                j+= 1
+
         i+=1
+        
+        
     return check
-print (Can(Comandos, [], Directions, Orientations, num, tokens))
+#print (Can(Comandos, [], Directions, Orientations, num, tokens), '///////////////////////')
 ################################################################            parentesis de cierre esta pendiente
 def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens):
     i = 0
