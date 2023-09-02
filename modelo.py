@@ -6,7 +6,7 @@ nltk.download('punkt')
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = "{walk(1); walk (3,front); walk(2,north)}"
+texto_prueba = "{walk(1); jump (3 ,4); walk(2,north); turn(front); get(1); leap(1,left); nop() }" # solo mira brackets
 #texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
 
 pattern = r'\w+|[.,(){}\[\]]|\S+'
@@ -20,7 +20,6 @@ Orientations = ['north', 'south', 'west', 'east']
 num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 Comandos = ['walk', 'leap', 'jump', 'turn', 'turnto', 'drop', 'get','grab', 'letgo', 'nop']
 Condicion = ['facing', 'can', 'not']
-lo_d_maria = []
 
 def correccionIndexOOR(element_to_check, position_to_check, Lista):
     pos = (len(Lista)-1) - position_to_check
@@ -114,6 +113,13 @@ def check_defProc(tokens):
         i += 1
     return check,dict_nombres  
 
+# Variables y funciones creadas 
+list_variables_names_tupla = check_defVar(tokens)
+list_variables_names = list_variables_names_tupla[1]
+dict_nombres_proc_tupla = check_defProc(tokens)
+dict_nombres_proc = dict_nombres_proc_tupla[1]
+
+
 #COMANDOS
 def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens):
     '''
@@ -163,15 +169,15 @@ def Jump (lista_variables_creadas, num, tokens):
     while i < len(tokens):
         if tokens[i] == "jump":
             if (correccionIndexOOR('jump', 0, tokens)[0]== True) or (correccionIndexOOR('jump', 1, tokens)[0]== True) or (correccionIndexOOR('jump', 2, tokens)[0]== True) or (correccionIndexOOR('jump', 3, tokens)[0]== True) or (correccionIndexOOR('jump', 4, tokens)[0]== True):
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 
             elif (correccionIndexOOR('jump', 5, tokens) ==(True, i)) and tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in num) or (tokens[i+4] in lista_variables_creadas)) and tokens[i+5] == ')':
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+6:], checkCan
             
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in num) or (tokens[i+4] in lista_variables_creadas)) and tokens[i+5] == ')':
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+6:], checkCan
             else:
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 
         i += 1
     
@@ -182,15 +188,15 @@ def Turn (Directions, tokens):
     while i < len(tokens):
         if tokens[i] == "turn":
             if  (correccionIndexOOR('turn', 0, tokens)[0]== True) or (correccionIndexOOR('turn', 1, tokens)[0]== True) or (correccionIndexOOR('turn', 2, tokens)[0]== True):
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 
             elif (correccionIndexOOR('turn', 3, tokens) == (True, i)) and tokens[i+1] == '(' and (tokens[i+2] in Directions) and tokens[i+3] == ')':
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+4:], checkCan
             
             elif tokens[i+1] == '(' and (tokens[i+2] in Directions) and tokens[i+3] == ')':
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+4:], checkCan
             else:
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 
         i += 1
 
@@ -200,24 +206,24 @@ def TurnTo (Orientations, tokens):
     while i < len(tokens):
         if tokens[i] == "turnto":
             if  (correccionIndexOOR('turnto', 0, tokens)[0]== True) or (correccionIndexOOR('turnto', 1, tokens)[0]== True) or (correccionIndexOOR('turnto', 2, tokens)[0]== True):
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 
             elif (correccionIndexOOR('turnto', 3, tokens) == (True, i)) and tokens[i+1] == '(' and (tokens[i+2] in Orientations) and tokens[i+3] == ')':
                 checkCan =CanEnComandos(i, 1)
                 if checkCan != True:
-                    return False, lo_d_maria, checkCan
+                    return False, tokens[i:], checkCan
                     
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+4:], checkCan
                 
             elif tokens[i+1] == '(' and (tokens[i+2] in Orientations) and tokens[i+3] == ')':
                 checkCan =CanEnComandos(i, 1)
                 if checkCan != True:
-                    return False, lo_d_maria, checkCan
+                    return False, tokens[i:], checkCan
                     
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+4:], checkCan
                 
             else:
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 break
         i += 1
 
@@ -227,20 +233,20 @@ def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens):
     while i < len(tokens):
         if (tokens[i] == "drop") or (tokens[i] == "get") or (tokens[i] == "grab") or (tokens[i] == "letgo"):
             if  (correccionIndexOOR(tokens[i], 0, tokens)[0]== True) or (correccionIndexOOR(tokens[i], 1, tokens)[0]== True) or (correccionIndexOOR(tokens[i], 2, tokens)[0]== True):
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 
             elif (correccionIndexOOR(tokens[i], 3, tokens) == (True, i)) and tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
                 checkCan =CanEnComandos(i, 1) 
                 if checkCan != True:
-                    return False, lo_d_maria, checkCan
+                    return False, tokens[i:], checkCan
                     
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+4:], checkCan
                 
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
                 checkCan =CanEnComandos(i, 1) 
                 if checkCan != True:
-                    return False, lo_d_maria, checkCan
-                return True, lo_d_maria, checkCan
+                    return False, tokens[i:], checkCan
+                return True, tokens[i+4:], checkCan
                 
             else:
                 return False
@@ -253,23 +259,23 @@ def Nop(tokens):
     while i < len(tokens):
         if tokens[i] == "nop":
             if correccionIndexOOR('nop', 0, tokens)[0] == True or correccionIndexOOR('nop', 1, tokens)[0]== True:
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 
             elif correccionIndexOOR('nop', 2, tokens) == (True, i) and tokens[i+1] == '(' and tokens[i+2] == ')':
                 checkCan =CanEnComandos(i, 0) 
                 if checkCan != True:
-                    return False, lo_d_maria, checkCan
+                    return False, tokens[i:], checkCan
                     
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+3:], checkCan
             
             elif tokens[i+1] == '(' and tokens[i+2] == ')':
                 checkCan =CanEnComandos(i, 0) 
                 if checkCan != True:
-                    return False, lo_d_maria, checkCan
+                    return False, tokens[i:], checkCan
                     
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+3:], checkCan
             else:
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
         i += 1
 
 #CONDICIONES
@@ -302,23 +308,23 @@ def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, token
                     sliced_tokens = (tokens[i:])
                     nuevo_inico = tokens[i+2]
                     if (nuevo_inico == 'walk') or (nuevo_inico == 'leap'):
-                        check, maria, checkCan = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)
+                        check, _, checkCan = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)
                     elif (nuevo_inico == 'jump'):
-                        check, maria, checkCan = Jump (lista_variables_creadas, num, sliced_tokens)
+                        check, _, checkCan = Jump (lista_variables_creadas, num, sliced_tokens)
                     elif (nuevo_inico == 'turn'):
-                        check, maria, checkCan = Turn (Directions, sliced_tokens)
+                        check, _, checkCan = Turn (Directions, sliced_tokens)
                     elif (nuevo_inico == 'turnto'):
-                        check, maria, checkCan = TurnTo (Orientations, sliced_tokens)
+                        check, _, checkCan = TurnTo (Orientations, sliced_tokens)
                         if checkCan!= True or check != True:
                             check = False
                             break
                     elif (nuevo_inico == 'drop') or (nuevo_inico == 'get') or (nuevo_inico == 'grab') or (nuevo_inico == 'letgo'):
-                        check, maria, checkCan = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)
+                        check, _, checkCan = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)
                         if checkCan != True or check != True:
                             check = False
                             break
                     elif (nuevo_inico == 'nop'):
-                        check, maria, checkCan = Nop(sliced_tokens)
+                        check, _, checkCan = Nop(sliced_tokens)
                         if checkCan != True or check != True:
                             check = False
                             break
@@ -354,7 +360,7 @@ def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comando
 
 #CONTROL STRUCTURES (condicionales)
 
-
+#Funcion para verificar si las funciones de defProc se vuelven a implementar bien
 def check_funciones_defProc(dict_nombres_proc, tokens):
     i = 0
     check = True
@@ -379,6 +385,7 @@ def check_funciones_defProc(dict_nombres_proc, tokens):
 dict_nombres_proc = (check_defProc(tokens))[1]
 lista_variables_creadas = (check_defVar(tokens))[1]
 
+#Funcion para cada vez que aparezcan corchetes
 def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0 
     check = True
@@ -434,19 +441,8 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
     check = check and se_cerro_corchete and se_abrio_corchete
     return check
 
-###COMAAAAAA###
-#arreglar { que si no entra siempre va a ser true 
-
-list_variables_names_tupla = check_defVar(tokens)
-list_variables_names = list_variables_names_tupla[1]
-
-dict_nombres_proc_tupla = check_defProc(tokens)
-dict_nombres_proc = dict_nombres_proc_tupla[1]
-
-
-### falta implementar esta funcion en el defProc###
-
-#### recorro la lista de cada nombre y tiene que ser igual a la estructura que es correcta, mirar cantidad parametros ###
-
+### al bloque de comandos le falta llamar condicionales y eso ###
+###arreglar { } que lo toma como true y tiene que haber algo adentro ### ( EN LA FUNCION GRANDE ) 
 ### CAMBIAR EL IS INSTANCE POR UNA FUNCION AUXILIAR QUE RECORRA CADA CADENA DEL NOMBRE ###
-print(blockCommands(dict_nombres_proc,list_variables_names,Directions,Orientations,num,tokens ), "ojala funcione")
+
+print(blockCommands(dict_nombres_proc,list_variables_names,Directions,Orientations,num,tokens ), "comprobado block commands")
