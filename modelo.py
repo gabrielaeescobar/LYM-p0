@@ -113,104 +113,99 @@ def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens):
         
     '''
     i = 0
-    checkCan = None
     while i < len(tokens):
         if ((tokens[i] == "walk") or (tokens[i] == "leap")):
             if (correccionIndexOOR('walk', 2, tokens)[0]== True or correccionIndexOOR('leap', 2, tokens)[0]== True) or (correccionIndexOOR('walk', 1, tokens)[0]== True or correccionIndexOOR('leap', 1, tokens)[0]== True) or (correccionIndexOOR('walk', 0, tokens)[0]== True or correccionIndexOOR('leap', 0, tokens)[0]== True):
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
             elif ((correccionIndexOOR('walk', 3, tokens) == (True, i))  or (correccionIndexOOR('leap', 3, tokens) == (True, i))) and tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
-                return True, tokens[i+4:], checkCan
+                return True, tokens[i+4:]
             
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
-                return True, tokens[i+4:], checkCan
+                return True, tokens[i+4:]
             
             #ya no hay posibles 'walk' o 'leap' con solo un parametro
             
             elif (correccionIndexOOR('walk', 3, tokens)[0]== True or correccionIndexOOR('leap', 3, tokens)[0]== True) or (correccionIndexOOR('walk', 4, tokens)[0]== True or correccionIndexOOR('leap', 4, tokens)[0]== True):
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
             elif ((correccionIndexOOR('walk', 5, tokens) == (True, i))  or (correccionIndexOOR('leap', 5, tokens) == (True, i))) and tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in Directions) or (tokens[i+4] in Orientations)) and tokens[i+5] == ')':
-                return True, tokens[i+6:], checkCan
+                return True, tokens[i+6:]
             
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in Directions) or (tokens[i+4] in Orientations)) and tokens[i+5] == ')':
-                return True, tokens[i+6:], checkCan
+                return True, tokens[i+6:]
             
             else:
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
 
         i+=1
 #print(Walk_Leap([], Directions, Orientations, num, tokens))
 def Jump (lista_variables_creadas, num, tokens):
     i = 0
-    checkCan = None
     while i < len(tokens):
         if tokens[i] == "jump":
             if (correccionIndexOOR('jump', 0, tokens)[0]== True) or (correccionIndexOOR('jump', 1, tokens)[0]== True) or (correccionIndexOOR('jump', 2, tokens)[0]== True) or (correccionIndexOOR('jump', 3, tokens)[0]== True) or (correccionIndexOOR('jump', 4, tokens)[0]== True):
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
             elif (correccionIndexOOR('jump', 5, tokens) ==(True, i)) and tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in num) or (tokens[i+4] in lista_variables_creadas)) and tokens[i+5] == ')':
-                return True, tokens[i+6:], checkCan
+                return True, tokens[i+6:]
             
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in num) or (tokens[i+4] in lista_variables_creadas)) and tokens[i+5] == ')':
-                return True, tokens[i+6:], checkCan
+                return True, tokens[i+6:]
             else:
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
         i += 1
     
 
 def Turn (Directions, tokens):
     i = 0
-    checkCan = None
     while i < len(tokens):
         if tokens[i] == "turn":
             if  (correccionIndexOOR('turn', 0, tokens)[0]== True) or (correccionIndexOOR('turn', 1, tokens)[0]== True) or (correccionIndexOOR('turn', 2, tokens)[0]== True):
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
             elif (correccionIndexOOR('turn', 3, tokens) == (True, i)) and tokens[i+1] == '(' and (tokens[i+2] in Directions) and tokens[i+3] == ')':
-                return True, tokens[i+4:], checkCan
+                return True, tokens[i+4:]
             
             elif tokens[i+1] == '(' and (tokens[i+2] in Directions) and tokens[i+3] == ')':
-                return True, tokens[i+4:], checkCan
+                return True, tokens[i+4:]
             else:
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
         i += 1
 
 def TurnTo (Orientations, tokens):
     i = 0
-    checkCan = None
     while i < len(tokens):
         if tokens[i] == "turnto":
             if  (correccionIndexOOR('turnto', 0, tokens)[0]== True) or (correccionIndexOOR('turnto', 1, tokens)[0]== True) or (correccionIndexOOR('turnto', 2, tokens)[0]== True):
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
             elif (correccionIndexOOR('turnto', 3, tokens) == (True, i)) and tokens[i+1] == '(' and (tokens[i+2] in Orientations) and tokens[i+3] == ')':
-                return True, tokens[i+4:], checkCan
+                return True, tokens[i+4:]
                 
             elif tokens[i+1] == '(' and (tokens[i+2] in Orientations) and tokens[i+3] == ')':
-                return True, tokens[i+4:], checkCan
+                return True, tokens[i+4:]
                 
             else:
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
         i += 1
 
 def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens):
     i = 0
-    checkCan = None
     while i < len(tokens):
         if (tokens[i] == "drop") or (tokens[i] == "get") or (tokens[i] == "grab") or (tokens[i] == "letgo"):
             if  (correccionIndexOOR(tokens[i], 0, tokens)[0]== True) or (correccionIndexOOR(tokens[i], 1, tokens)[0]== True) or (correccionIndexOOR(tokens[i], 2, tokens)[0]== True):
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
             elif (correccionIndexOOR(tokens[i], 3, tokens) == (True, i)) and tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
-                return True, tokens[i+4:], checkCan
+                return True, tokens[i+4:]
                 
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
-                return True, tokens[i+4:], checkCan
+                return True, tokens[i+4:]
                 
             else:
                 return False
@@ -218,19 +213,18 @@ def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens):
         i+= 1
 def Nop(tokens):
     i = 0
-    checkCan = None
     while i < len(tokens):
         if tokens[i] == "nop":
             if correccionIndexOOR('nop', 0, tokens)[0] == True or correccionIndexOOR('nop', 1, tokens)[0]== True:
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
                 
             elif correccionIndexOOR('nop', 2, tokens) == (True, i) and tokens[i+1] == '(' and tokens[i+2] == ')':    
-                return True, tokens[i+3:], checkCan
+                return True, tokens[i+3:]
             
             elif tokens[i+1] == '(' and tokens[i+2] == ')':
-                return True, tokens[i+3:], checkCan
+                return True, tokens[i+3:]
             else:
-                return False, tokens[i:], checkCan
+                return False, tokens[i:]
         i += 1
 print (Nop(tokens), '///////////////////////////')
 #CONDICIONES
