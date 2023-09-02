@@ -6,8 +6,8 @@ nltk.download('punkt')
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = "{walk(1); jump (3 ,4); walk(2,north); turn(front); get(1); leap(1,left); nop() }" # solo mira brackets
-#texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
+#texto_prueba = "{walk(1); jump (3 ,4); walk(2,north); turn(front); get(1); leap(1,left); nop() }" # solo mira brackets
+texto_prueba = "defvar n 3 "
 
 pattern = r'\w+|[.,(){}\[\]]|\S+'
 #pattern = r'\w+|,'
@@ -20,6 +20,16 @@ Orientations = ['north', 'south', 'west', 'east']
 num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 Comandos = ['walk', 'leap', 'jump', 'turn', 'turnto', 'drop', 'get','grab', 'letgo', 'nop']
 Condicion = ['facing', 'can', 'not']
+alfabeto = 'abcdefghijklmnopqrstuvwxyz'
+
+#Funcion para rectificar que es un nombre valido
+def nombre_correcto(nombre):
+    check = True
+    for caracter in nombre:
+        if caracter not in alfabeto:
+            check = False
+            break
+    return check
 
 def correccionIndexOOR(element_to_check, position_to_check, Lista):
     pos = (len(Lista)-1) - position_to_check
@@ -70,7 +80,7 @@ def check_defVar(tokens):
             lista_nombres.append(nombre)
             valor = tokens[i+2]
             
-            if isinstance(nombre, str) and valor.isdigit():
+            if nombre_correcto(nombre) and valor.isdigit():
                 check = True
                 i += 2  # Avanzar el índice para saltar al próximo token
 
@@ -90,28 +100,23 @@ def check_defProc(tokens):
             nombre = tokens[i+1]
             dict_nombres[nombre] = ""
             parentesis_izquierdo = tokens[i+2]
-            if isinstance(nombre,str) and parentesis_izquierdo == "(":
+            if nombre_correcto(nombre) and parentesis_izquierdo == "(":
                 continuacion = tokens[i+3]
                 if continuacion == ")": # primer caso 0 parametros
                     check = True
-                    dict_nombres[nombre] = [tokens[i+2],continuacion]
-                    longitud_l = len(dict_nombres[nombre])
-                    dict_nombres[nombre] = longitud_l
-                elif isinstance(continuacion,str) and tokens[i+4] == ")": # segundo caso 1 parametro
+                    dict_nombres[nombre] = 2
+                elif nombre_correcto(continuacion) and tokens[i+4] == ")": # segundo caso 1 parametro
                     check = True
-                    dict_nombres[nombre] = len[tokens[i+2],continuacion,tokens[i+4]]
-                    longitud_l = len(dict_nombres[nombre])
-                    dict_nombres[nombre] = longitud_l
-                elif isinstance(continuacion,str) and tokens[i+4] == "," and isinstance(tokens[i+5],str) and tokens[i+6] == ")": # tercer caso 2 parametros
+                    dict_nombres[nombre] = 3
+                elif nombre_correcto(continuacion) and tokens[i+4] == "," and nombre_correcto(tokens[i+5]) and tokens[i+6] == ")": # tercer caso 2 parametros
                     check = True
-                    dict_nombres[nombre] = len[tokens[i+2],continuacion,tokens[i+4],tokens[i+5],tokens[i+5]]
-                    longitud_l = len(dict_nombres[nombre])
-                    dict_nombres[nombre] = longitud_l
+                    dict_nombres[nombre] = 5
                 else:
                     check = False
 
         i += 1
     return check,dict_nombres  
+print(check_defVar(tokens),"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
 # Variables y funciones creadas 
 list_variables_names_tupla = check_defVar(tokens)
@@ -335,7 +340,7 @@ def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, token
                 break
         i+=1
     return check
-print (Can(Comandos, [], Directions, Orientations, num, tokens))
+#print (Can(Comandos, [], Directions, Orientations, num, tokens))
 ################################################################            parentesis de cierre esta pendiente
 def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens):
     i = 0
@@ -376,7 +381,7 @@ def check_funciones_defProc(dict_nombres_proc, tokens):
                 if not (tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')'):     #estructura que lleva 2 parametros
                     check = False
 
-            elif tokens[i] == key and dict_nombres_proc[key] == 4:
+            elif tokens[i] == key and dict_nombres_proc[key] == 5:
                 if not(tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in Directions) or (tokens[i+4] in Orientations)) and tokens[i+5] == ')'):   #estructura que lleva 3 parametros 
                     check = False
 
@@ -443,6 +448,5 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
 
 ### al bloque de comandos le falta llamar condicionales y eso ###
 ###arreglar { } que lo toma como true y tiene que haber algo adentro ### ( EN LA FUNCION GRANDE ) 
-### CAMBIAR EL IS INSTANCE POR UNA FUNCION AUXILIAR QUE RECORRA CADA CADENA DEL NOMBRE ###
 
-print(blockCommands(dict_nombres_proc,list_variables_names,Directions,Orientations,num,tokens ), "comprobado block commands")
+#print(blockCommands(dict_nombres_proc,list_variables_names,Directions,Orientations,num,tokens ), "comprobado block commands")
