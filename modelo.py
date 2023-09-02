@@ -8,10 +8,12 @@ nltk.download('punkt')
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = "defvar n 0 defproc goNorth() {jump ( 1 , 2 )} "
+texto_prueba = "defvar n 0 defproc goNorth() defproc go() {goNorth()  go()}"
 #texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
 
-tokens = word_tokenize(texto_prueba)
+pattern = r'\w+|[.,(){}\[\]]|\S+'
+#pattern = r'\w+|,'
+tokens = regexp_tokenize(texto_prueba, pattern)
 print(tokens,"estos son los tokens")
 
 #Direcciones y orientaciones para comandos
@@ -165,32 +167,45 @@ def Nop(tokens):
                 check = False
         i += 1
     return check
-
-def check_funciones_defProc(dict_nombres_proc, tokens):
+# solo me esta haciendo el proceso de 1
+def check_funciones_defProc(dict_nombres_proc, tokens, lista_variables_creadas):
     i = 0
+    check = True
     keys_dict_nombres_proc = dict_nombres_proc.keys()
-    values_dict_nombres_proc = dict_nombres_proc.values()
-    #estructura que lleva 1 parametro
+
     while i < len(tokens):
         for key in keys_dict_nombres_proc:
             if tokens[i] == key and dict_nombres_proc[key] == 2:
-                tokens
-
-
-    #estructura que lleva 2 parametros
-    #estructura que lleva 3 parametros   
-    return 0  
+                if not (tokens[i+1] == '(' and tokens[i+2] == ')'): #estructura que lleva 1 parametro
+                    check = False
+                    print(tokens[i+1],key,"primeeer")
+            elif tokens[i] == key and dict_nombres_proc[key] == 3:
+                if not (tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')'):     #estructura que lleva 2 parametros
+                    check = False
+                    print(tokens[i+1],key,"seugndo")
+            elif tokens[i] == key and dict_nombres_proc[key] == 4:
+                if not(tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in Directions) or (tokens[i+4] in Orientations)) and tokens[i+5] == ')'):   #estructura que lleva 3 parametros 
+                    check = False
+                    print(tokens[i+1],key,"terceroo")
+        i += 1  
+    return check
+dict_nombres_proc = (check_defProc(tokens))[1]
+lista_variables_creadas = (check_defVar(tokens))[1]
+print(check_funciones_defProc(dict_nombres_proc, tokens, lista_variables_creadas),"------------")
 
 def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0 
     check = True
+    se_abrio_corchete = False
+    se_cerro_corchete = False
     values_dict_nombres_proc = dict_nombres_proc.values()
     keys_dict_nombres_proc = dict_nombres_proc.keys()
     print(keys_dict_nombres_proc,"what")
     print(values_dict_nombres_proc,"que")
     while i < len(tokens):
         if tokens[i] == "{":  ## debe hacerse con slize [i+1]
-            print (tokens[i+1:])
+            se_abrio_corchete = True
+            print (tokens[i])
             if tokens[i+1] == "walk" or tokens[i+1] == "leap":
                 check = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens[i:])
 
@@ -208,17 +223,19 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
 
             elif tokens[i+1] == "nop" :
                 check = Nop( tokens[i:])
-            #if tokens[i+2] in keys_dict_nombres_proc:
-                #if tokens[i+1] == dict_nombres_proc[tokens[i+1]]: 
-                check = True 
-
-            if (tokens[i+1] != "}" and tokens[i+1] not in ['defvar', 'n', '0', 'defproc', 'goNorth', '(', ')', '{', 'jump', '(', '1', ',', '2', ')']) or (check == False) :
-                check = False
-            else:
+            
+            elif tokens[i+1] in keys_dict_nombres_proc: 
+                check = check_funciones_defProc(dict_nombres_proc, tokens, lista_variables_creadas) 
+            if (check == False):
                 break
-        
+
+        if tokens[i] == "}":
+            se_cerro_corchete = True
+            break
+                
         i+=1
-        print(tokens[i-1])
+    print(check, se_cerro_corchete)
+    check = check and se_cerro_corchete #or not se_abrio_corchete
     return check
 ###COMAAAAAA###
 #arreglar { que si no entra siempre va a ser true 
