@@ -285,10 +285,7 @@ def Facing (Orientations, tokens):
             else:
                 check = False
         i += 1
-    return check
-'''def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, tokens):
-    if 'can' in tokens:
-   '''     
+    return check  
 
 def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0
@@ -304,11 +301,11 @@ def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, token
                     sliced_tokens = (tokens[i:])
                     nuevo_inico = tokens[i+2]
                     if (nuevo_inico == 'walk') or (nuevo_inico == 'leap'):
-                        check = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)
+                        check, maria, checkCan = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)
                     elif (nuevo_inico == 'jump'):
-                        check = Jump (lista_variables_creadas, num, sliced_tokens)
+                        check, maria, checkCan = Jump (lista_variables_creadas, num, sliced_tokens)
                     elif (nuevo_inico == 'turn'):
-                        check = Turn (Directions, sliced_tokens)
+                        check, maria, checkCan = Turn (Directions, sliced_tokens)
                     elif (nuevo_inico == 'turnto'):
                         check, maria, checkCan = TurnTo (Orientations, sliced_tokens)
                         if checkCan!= True or check != True:
@@ -332,7 +329,7 @@ def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, token
         i+=1
     return check
 print (Can(Comandos, [], Directions, Orientations, num, tokens))
-################################################################            parentesis de cierre queda pendiente
+################################################################            parentesis de cierre esta pendiente
 def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens):
     i = 0
     check = False
@@ -355,7 +352,6 @@ def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comando
     return check
 
 #CONTROL STRUCTURES (condicionales)
-#def IfYElse (dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens):
 
 
 def check_funciones_defProc(dict_nombres_proc, tokens):
@@ -414,16 +410,15 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
         i+=1
         #print(tokens[i-1])
     return check
+
 ###COMAAAAAA###
 #arreglar { que si no entra siempre va a ser true 
 
 list_variables_names_tupla = check_defVar(tokens)
 list_variables_names = list_variables_names_tupla[1]
-#print(list_variables_names,"lol")
+
 dict_nombres_proc_tupla = check_defProc(tokens)
 dict_nombres_proc = dict_nombres_proc_tupla[1]
-#print(dict_nombres_proc,"loool")
-#print(blockCommands(dict_nombres_proc,list_variables_names,Directions,Orientations,num,tokens ), "ojala funcione")
 
 
 ### falta implementar esta funcion en el defProc###
