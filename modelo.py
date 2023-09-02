@@ -131,27 +131,27 @@ def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens):
     while i < len(tokens):
         if ((tokens[i] == "walk") or (tokens[i] == "leap")):
             if (correccionIndexOOR('walk', 2, tokens)[0]== True or correccionIndexOOR('leap', 2, tokens)[0]== True) or (correccionIndexOOR('walk', 1, tokens)[0]== True or correccionIndexOOR('leap', 1, tokens)[0]== True) or (correccionIndexOOR('walk', 0, tokens)[0]== True or correccionIndexOOR('leap', 0, tokens)[0]== True):
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 
             elif ((correccionIndexOOR('walk', 3, tokens) == (True, i))  or (correccionIndexOOR('leap', 3, tokens) == (True, i))) and tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+4:], checkCan
             
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')':
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+4:], checkCan
             
             #ya no hay posibles 'walk' o 'leap' con solo un parametro
             
             elif (correccionIndexOOR('walk', 3, tokens)[0]== True or correccionIndexOOR('leap', 3, tokens)[0]== True) or (correccionIndexOOR('walk', 4, tokens)[0]== True or correccionIndexOOR('leap', 4, tokens)[0]== True):
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 
             elif ((correccionIndexOOR('walk', 5, tokens) == (True, i))  or (correccionIndexOOR('leap', 5, tokens) == (True, i))) and tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in Directions) or (tokens[i+4] in Orientations)) and tokens[i+5] == ')':
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+6:], checkCan
             
             elif tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in Directions) or (tokens[i+4] in Orientations)) and tokens[i+5] == ')':
-                return True, lo_d_maria, checkCan
+                return True, tokens[i+6:], checkCan
             
             else:
-                return False, lo_d_maria, checkCan
+                return False, tokens[i:], checkCan
                 
 
         i+=1
