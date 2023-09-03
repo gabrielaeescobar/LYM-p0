@@ -6,7 +6,7 @@ nltk.download('punkt')
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = "{(walk(1)); not : facing(north); heheh; turn(front); get(1); leap(1,left) }" # solo mira brackets
+texto_prueba = "{walk(1); get(1); leap(1,left)}" # solo mira brackets
 #texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
 
 pattern = r'\w+|[.,(){}\[\]]|\S+'
@@ -205,7 +205,7 @@ def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens):
                 return True, tokens[i+4:]
                 
             else:
-                return False
+                return False, tokens[i:]
                 
         i+= 1
 def Nop(tokens):
@@ -335,7 +335,6 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
         while i < len(tokens) :
             print ("tOKEN IS ", tokens[i])
             if tokens[i] == "walk" or tokens[i] == "leap":
-                print(f'Voy a entrar a walk con { tokens[i:]}')
                 check, tokens= Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens[i:])
                 i=0  
 
@@ -369,6 +368,7 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
                 break
 
             i+=1
+
         if tokens[i] == "}":
             se_cerro_corchete = True
                 
