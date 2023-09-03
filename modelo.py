@@ -6,7 +6,7 @@ nltk.download('punkt')
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = "{walk(1); get(1); leap(1,left)}" # solo mira brackets
+texto_prueba = "{walk(1); get(1); leap(1,left)} { get(1); leap(1,left)} walk(1,north)}" # solo mira 1 bracket
 #texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
 
 pattern = r'\w+|[.,(){}\[\]]|\S+'
@@ -370,12 +370,13 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
             i+=1
 
         if tokens[i] == "}":
+            tokens = tokens[i+1:]
             se_cerro_corchete = True
                 
        
     
     check = check and se_cerro_corchete and se_abrio_corchete
-    return check
+    return check, tokens
 
 ### al bloque de comandos le falta llamar condicionales y eso ###
 ###arreglar { } que lo toma como true y tiene que haber algo adentro ### ( EN LA FUNCION GRANDE ) 
