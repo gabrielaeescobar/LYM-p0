@@ -6,7 +6,7 @@ nltk.download('punkt')
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = "{(walk(1)); can(jump (3 ,9)); walk(2,north); turn(front); get(1); leap(1,left)}" # solo mira brackets
+texto_prueba = "{(walk(1)); not : facing(north); heheh; turn(front); get(1); leap(1,left) }" # solo mira brackets
 #texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
 
 pattern = r'\w+|[.,(){}\[\]]|\S+'
@@ -19,7 +19,7 @@ Directions = ['front', 'right', 'left', 'back']
 Orientations = ['north', 'south', 'west', 'east']
 num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 Comandos = ['walk', 'leap', 'jump', 'turn', 'turnto', 'drop', 'get','grab', 'letgo', 'nop']
-Condicion = ['facing', 'can', 'not']
+Condiciones = ['facing', 'can', 'not']
 
 def correccionIndexOOR(element_to_check, position_to_check, Lista):
     pos = (len(Lista)-1) - position_to_check
@@ -34,7 +34,6 @@ def correccionIndexOOR(element_to_check, position_to_check, Lista):
     else:
         check = False
     return check, pos
-
 
 # Funcion para defVar 
 ### HACER LO DE QUE LOS NOMBRES SE VUELVEN A USAR ###
@@ -98,7 +97,6 @@ list_variables_names = list_variables_names_tupla[1]
 dict_nombres_proc_tupla = check_defProc(tokens)
 dict_nombres_proc = dict_nombres_proc_tupla[1]
 
-
 #COMANDOS
 def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens):
     '''
@@ -140,7 +138,6 @@ def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens):
                 
 
         i+=1
-#print(Walk_Leap([], Directions, Orientations, num, tokens))
 def Jump (lista_variables_creadas, num, tokens):
     i = 0
     while i < len(tokens):
@@ -157,8 +154,6 @@ def Jump (lista_variables_creadas, num, tokens):
                 return False, tokens[i:]
                 
         i += 1
-    
-
 def Turn (Directions, tokens):
     i = 0
     while i < len(tokens):
@@ -175,7 +170,6 @@ def Turn (Directions, tokens):
                 return False, tokens[i:]
                 
         i += 1
-
 def TurnTo (Orientations, tokens):
     i = 0
     while i < len(tokens):
@@ -193,7 +187,6 @@ def TurnTo (Orientations, tokens):
                 return False, tokens[i:]
                 
         i += 1
-
 def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens):
     i = 0
     while i < len(tokens):
@@ -226,33 +219,28 @@ def Nop(tokens):
             else:
                 return False, tokens[i:]
         i += 1
-print (Nop(tokens), '///////////////////////////')
+
 #CONDICIONES
 def Facing (Orientations, tokens):
     i = 0
-    check = False
     while i < len(tokens):
         if(tokens[i] == "facing"):
             if (correccionIndexOOR('facing', 0, tokens)[0]== True) or (correccionIndexOOR('facing', 1, tokens)[0]== True) or (correccionIndexOOR('facing', 2, tokens)[0]== True):
-                check = False
-                break
+                return False, tokens[i:]
             elif tokens[i+1] == '(' and (tokens[i+2] in Orientations) and tokens[i+3] == ')':
-                check = True
+                return True, tokens[i+4:]
             else:
-                check = False
+                return False, []
         i += 1
-    return check  
-
 def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0
-    check = False
     while i < len(tokens):
 
         if tokens[i] == "can":
             
             j = i+1
             if (correccionIndexOOR('can', 0, tokens)[0] == True) or (correccionIndexOOR('can', 1, tokens)[0]== True) or (correccionIndexOOR('can', 2, tokens)[0] == True):
-                return False
+                return False, []
             while j < len(tokens[i+1:]):
                 if tokens[j] =='(':
                     if (tokens[j+1] in Comandos):
@@ -278,44 +266,33 @@ def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, token
                             sliced_sliced = Nop(sliced_tokens)[1]
                             
                         else:
-                            check = False
+                            check = False, []
                             
                         if check != True or sliced_sliced[0] != ')':
-                            return False
+                            return False, []
                         else:
-                            return True
-                        
-                    
+                            return True, sliced_sliced[1:]
                 else:
-                    return False
+                    return False, []
                 j+= 1
-
         i+=1
-        
-        
-    return check
-#print (Can(Comandos, [], Directions, Orientations, num, tokens), '///////////////////////')
-################################################################            parentesis de cierre esta pendiente
 def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens):
     i = 0
-    check = False
     while i < len(tokens):
         if tokens[i] == "not":
             if (correccionIndexOOR('not', 0, tokens)[0]== True) or (correccionIndexOOR('not', 1, tokens)[0]== True) or (correccionIndexOOR('not', 2, tokens)[0]== True):
-                check = False
-                break
+                return False, []
             
             elif tokens[i+1] == ':' and (tokens[i+2] in Condiciones):
                 sliced_tokens=(tokens[i+2:])
                 nuevo_inico = tokens[i+2]
                 if nuevo_inico == 'can':
-                    check = Can(Comandos, lista_variables_creadas, Directions, Orientations, num, sliced_tokens)[0]
+                    return Can(Comandos, lista_variables_creadas, Directions, Orientations, num, sliced_tokens)
                 elif nuevo_inico == 'facing':
-                    check = Facing (Orientations, sliced_tokens)[0]
+                    return Facing (Orientations, sliced_tokens)
                 else:
-                    check = False
+                    return False, []
         i += 1
-    return check
 
 #CONTROL STRUCTURES (condicionales)
 
