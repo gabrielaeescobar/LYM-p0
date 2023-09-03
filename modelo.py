@@ -6,7 +6,7 @@ nltk.download('punkt')
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = "{walk(1); jump (3 ,4); walk(2,north); turn(front); get(1); leap(1,left); nop()} " # solo mira brackets
+texto_prueba = "{walk(1); jump (3 ,4); walk(2,north); turn(front); get(1); leap(1,left); nop()}" # solo mira brackets
 #texto_prueba = "defvar n 3 "
 
 pattern = r'\w+|[.,(){}\[\]]|\S+'
@@ -212,7 +212,7 @@ def Drop_Get_Grab_LetGo (lista_variables_creadas, num, tokens):
                 return True, tokens[i+4:]
                 
             else:
-                return False
+                return False, tokens[i:]
                 
         i+= 1
 def Nop(tokens):
