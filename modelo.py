@@ -6,7 +6,7 @@ nltk.download('punkt')
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = "{walk(1); get(1); leap(1,left)} { get(1); leap(1,left)} walk(1,north)}" # solo mira 1 bracket
+texto_prueba = "repeat 3 times {get(1); leap(1,left)} else { get(1); leap(1,left)} wak(1,north)" # solo mira 1 bracket
 #texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
 
 pattern = r'\w+|[.,(){}\[\]]|\S+'
@@ -293,50 +293,6 @@ def Not (Condiciones, lista_variables_creadas, Directions, Orientations, Comando
                 else:
                     return False, []
         i += 1
-
-#CONTROL STRUCTURES (condicionales)
-def If (dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens):
-    i = 0
-    while i < len(tokens):
-        if(tokens[i] == "if"):
-            if (correccionIndexOOR('if', 0, tokens)[0]== True) or (correccionIndexOOR('if', 1, tokens)[0]== True) or (correccionIndexOOR('if', 2, tokens)[0]== True):
-                return False, tokens[i:]
-            elif tokens[i+1] in Condiciones:
-                if tokens[i+1] == 'facing':
-                    check, sliced = Facing(Orientations, tokens[i+1:])
-                elif tokens[i+1] == 'can':
-                    check, sliced = Can(Comandos, lista_variables_creadas, Directions, Orientations, num, tokens[i+1:])
-                elif tokens [i+1]== 'not':
-                    check, sliced = Not(Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens[i+1:])
-            if sliced!= [] and check !=False and sliced[0] == '{':
-                check = blockCommands(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens)
-        i += 1
-    return check, sliced
-print (If({}, [], Directions, Orientations, num, tokens), '///////////////')
-
-def While (dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens):
-    i = 0
-    while i < len(tokens):
-        if(tokens[i] == "while"):
-            if (correccionIndexOOR('while', 0, tokens)[0]== True) or (correccionIndexOOR('while', 1, tokens)[0]== True) or (correccionIndexOOR('while', 2, tokens)[0]== True):
-                return False, tokens[i:]
-            elif tokens[i+1] in Condiciones:
-                if tokens[i+1] == 'facing':
-                    check, sliced = Facing(Orientations, tokens[i+1:])
-                elif tokens[i+1] == 'can':
-                    check, sliced = Can(Comandos, lista_variables_creadas, Directions, Orientations, num, tokens[i+1:])
-                elif tokens [i+1]== 'not':
-                    check, sliced = Not(Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens[i+1:])
-            if sliced!= [] and check !=False and sliced[0] == '{':
-                check = blockCommands(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens)
-            else:
-                return False, []
-            
-            if check == True:
-                return True
-        i += 1
-        
-#def RepeatTimes(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens):
         
 #Funcion para verificar si las funciones de defProc se vuelven a implementar bien
 def check_funciones_defProc(dict_nombres_proc, tokens):
@@ -363,7 +319,7 @@ def check_funciones_defProc(dict_nombres_proc, tokens):
 dict_nombres_proc = (check_defProc(tokens))[1]
 lista_variables_creadas = (check_defVar(tokens))[1]
 
-#Funcion para cada vez que aparezcan corchetes
+#Funcion para cada vez que aparezcan corchetes/ bloques de comandos
 def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0 
     check = True
@@ -424,3 +380,77 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
 ###arreglar { } que lo toma como true y tiene que haber algo adentro ### ( EN LA FUNCION GRANDE ) 
 
 print(blockCommands(dict_nombres_proc,list_variables_names,Directions,Orientations,num,tokens ), "comprobado block commands")
+
+#CONTROL STRUCTURES (condicionales)
+def If (dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens):
+    i = 0
+    while i < len(tokens):
+        if(tokens[i] == "if"):
+            if (correccionIndexOOR('if', 0, tokens)[0]== True) or (correccionIndexOOR('if', 1, tokens)[0]== True) or (correccionIndexOOR('if', 2, tokens)[0]== True):
+                return False, tokens[i:]
+            elif tokens[i+1] in Condiciones:
+                if tokens[i+1] == 'facing':
+                    check, sliced = Facing(Orientations, tokens[i+1:])
+                elif tokens[i+1] == 'can':
+                    check, sliced = Can(Comandos, lista_variables_creadas, Directions, Orientations, num, tokens[i+1:])
+                elif tokens [i+1]== 'not':
+                    check, sliced = Not(Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens[i+1:])
+            else:
+                return False, []
+            
+            if sliced!= [] and check !=False and sliced[0] == '{':
+                check, ssliced = blockCommands(dict_nombres_proc,list_variables_names,Directions,Orientations,num, sliced)
+                if ssliced !=[] and check!= False and ssliced[0] == 'else':
+                    check, sssliced = blockCommands(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, ssliced[1:])
+                    if check == True:
+                        return check, sssliced
+                    else:
+                        return False, sssliced
+                else:
+                    return False, sssliced
+                
+            else:
+                return False, []
+                
+        i += 1
+    return check, sliced
+def While (dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens):
+    i = 0
+    while i < len(tokens):
+        if(tokens[i] == "while"):
+            if (correccionIndexOOR('while', 0, tokens)[0]== True) or (correccionIndexOOR('while', 1, tokens)[0]== True) or (correccionIndexOOR('while', 2, tokens)[0]== True):
+                return False, tokens[i:]
+            elif tokens[i+1] in Condiciones:
+                if tokens[i+1] == 'facing':
+                    check, sliced = Facing(Orientations, tokens[i+1:])
+                elif tokens[i+1] == 'can':
+                    check, sliced = Can(Comandos, lista_variables_creadas, Directions, Orientations, num, tokens[i+1:])
+                elif tokens [i+1]== 'not':
+                    check, sliced = Not(Condiciones, lista_variables_creadas, Directions, Orientations, Comandos, num, tokens[i+1:])
+            else:
+                return False,  []
+            if sliced!= [] and check !=False and sliced[0] == '{':
+                check, sliced = blockCommands(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, sliced)
+                if check == True:
+                    return True, sliced
+                else:
+                    return False, []
+            else:
+                return False, []
+            
+        i += 1
+def RepeatTimes(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens):
+    i = 0
+    while i < len(tokens):
+        if(tokens[i] == "repeat"):
+            if (correccionIndexOOR('repeat', 0, tokens)[0]== True) or (correccionIndexOOR('repeat', 1, tokens)[0]== True) or (correccionIndexOOR('repeat', 2, tokens)[0]== True):
+                return False, []
+            elif (tokens[i+1] in num or tokens[i+1] in lista_variables_creadas) and tokens[i+2] == 'times' and tokens[i+3]== '{':
+                check, sliced = blockCommands(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens[i+3:])
+                if check == True:
+                    return True, sliced
+                else:
+                    return False, []
+            else:
+                return False, []
+        i+= 1
