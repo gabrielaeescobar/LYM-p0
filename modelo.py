@@ -6,11 +6,10 @@ nltk.download('punkt')
 #texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 #texto = texto_carga.lower()
 
-texto_prueba = " { while can ( walk (1 , north ))}"
+texto_prueba = " defVar nom 0 defProc putCB (c, b) { jump(3,1)} {walk(1); get(1); leap(1,left)} defProc goNorth (){while can(walk(1, north )) { walk(1, north )}} 20 defProc goWest(){if can(walk(1, west )) { walk(1, west )} else nop ()}".lower()
 #texto_prueba = "{walk(1); get(1); leap(1,left)} { get(1); leap(1,left)} walk(1,north)}" # solo mira 1 bracket
-#texto_prueba2 = "defProc goNorth() { while can ( walk (1 , north )) { walk (1 , north ) }; putCB (1 ,1) } defProc hola (cara,de) "
 
-pattern = r'\w+|[.,(){}\[\]]|\S+'
+pattern = r'\w+|[.,(){};\[\]]|\S+'
 #pattern = r'\w+|,'
 tokens = regexp_tokenize(texto_prueba, pattern)
 print(tokens,"estos son los tokens")
@@ -55,56 +54,61 @@ def check_defVar(tokens):
       valor: valor numerico de la variable
     '''
     i = 0
-    check = False
+    check = True
     dict_nombres = {}
     while i < len(tokens):
         token = tokens[i]
         if token == "defvar":
+            check = False
             nombre = tokens[i+1]
             valor = tokens[i+2]
             dict_nombres[nombre] = valor
-            if nombre_correcto(nombre) and valor.isdigit():
+            if (nombre_correcto(nombre) and valor.isdigit()):
                 check = True
                 i += 2  # Avanzar el índice para saltar al próximo token
 
         i += 1
     
-    return check,dict_nombres
+    return check ,dict_nombres
+print(check_defVar(tokens),"vaaaaaaaaaaaaaar")
 
 # Listas nombres y variables creadas defvar, salen de un dict
 dict_defVar = check_defVar(tokens)[1]
-lista_variables_names = dict_defVar.keys()
-lista_variables_creadas = dict_defVar.values()
-#print(lista_variables_names, "aaaaaaaaaa esta es la primera list")
+lista_variables_creadas = dict_defVar.keys()
+print(lista_variables_creadas)
+lista_variables_values = dict_defVar.values()
 
 #Funcion para defProc
 def check_defProc(tokens):
     i= 0
     tokens = tokens
     dict_nombres = {}
-    check = False
+    check = True
     while i<len(tokens):
         token = tokens[i]
         if token == "defproc":
+            check = False
             nombre = tokens[i+1]
             dict_nombres[nombre] = ""
             parentesis_izquierdo = tokens[i+2]
             if nombre_correcto(nombre) and parentesis_izquierdo == "(":
                 continuacion = tokens[i+3]
-                if continuacion == ")": # primer caso 0 parametros
+                if (continuacion == ")"): # primer caso 0 parametros
                     check = True
                     dict_nombres[nombre] = 2
-                elif nombre_correcto(continuacion) and tokens[i+4] == ")": # segundo caso 1 parametro
+                elif (nombre_correcto(continuacion) and tokens[i+4] == ")"): # segundo caso 1 parametro
                     check = True
                     dict_nombres[nombre] = 3
-                elif nombre_correcto(continuacion) and tokens[i+4] == "," and nombre_correcto(tokens[i+5]) and tokens[i+6] == ")": # tercer caso 2 parametros
+                elif (nombre_correcto(continuacion) and tokens[i+4] == "," and nombre_correcto(tokens[i+5]) and tokens[i+6] == ")"): # tercer caso 2 parametros
                     check = True
                     dict_nombres[nombre] = 5
                 else:
                     check = False
 
         i += 1
-    return check,dict_nombres  
+    return check ,dict_nombres  
+
+print(check_defProc(tokens),"proccc")
 
 # Dict funciones creadas defProc
 dict_nombres_proc_tupla = check_defProc(tokens)
@@ -113,15 +117,13 @@ dict_nombres_proc = dict_nombres_proc_tupla[1]
 #COMANDOS
 
 ### MIRAR COMO FUNCIONA ASSING VALUE ###
-def assign_Value(lista_variables_names,tokens):
+def assign_Value(lista_variables_creadas,tokens):
     i = 0
     while i<len(tokens):
-        if tokens[i] in lista_variables_names and tokens[i+1] == "=" and (tokens[i+2]).isdigit():
+        if tokens[i] in lista_variables_creadas and tokens[i+1] == "=" and (tokens[i+2]).isdigit():
             dict_defVar[tokens[i]] = tokens[i+2]
         i+=1
         return dict_defVar.values()
-            
-#print(assign_Value(lista_variables_creadas,tokens),"nueva lista")
 
 
 def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens):
@@ -335,7 +337,7 @@ def If (dict_nombres_proc, lista_variables_creadas, Directions, Orientations, nu
                 return False, []
             
             if sliced!= [] and check !=False and sliced[0] == '{':
-                check, ssliced = blockCommands(dict_nombres_proc,lista_variables_names,Directions,Orientations,num, sliced)
+                check, ssliced = blockCommands(dict_nombres_proc,lista_variables_creadas,Directions,Orientations,num, sliced)
                 if ssliced !=[] and check!= False and ssliced[0] == 'else':
                     check, sssliced = blockCommands(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, ssliced[1:])
                     if check == True:
@@ -375,8 +377,6 @@ def While (dict_nombres_proc, lista_variables_creadas, Directions, Orientations,
                 return False, []
             
         i += 1
-
-print(While(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens),"queque")
 
 def RepeatTimes(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0
@@ -431,7 +431,7 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
         se_abrio_corchete = True
         i+=1
         while i < len(tokens) :
-            print ("tOKEN IS ", tokens[i])
+            #print ("tOKEN IS ", tokens[i])
             if tokens[i] == "walk" or tokens[i] == "leap":
                 check, tokens= Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens[i:])
                 i=0  
@@ -469,14 +469,18 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
                 i=0
             
 
-            if (check == False)  or (tokens[i] == "}") :
+            if (check == False):
+                return False, []
+            
+            if ( tokens[i] != ";"):
+                #check = False , []
+                print(tokens[i], '  because of this')
+                break
+            elif (tokens[i] == "}") :
                 print(f'breakie con check igual a {check} y mis tokens a actuales son {tokens}')
                 break
                 
-            elif ( tokens[i] != ";"):
-                check = False
-                print(tokens[i], '  because of this')
-                break
+
 
             i+=1
 
@@ -492,8 +496,38 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
     check = check and se_cerro_corchete and se_abrio_corchete
     return check, tokens
 
-### al bloque de comandos le falta llamar condicionales y eso ###
+print(blockCommands(dict_nombres_proc,lista_variables_creadas,Directions,Orientations,num,tokens ), "comprobado block commands")
+
+def funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens):
+
+    check_defVar_todo = check_defVar(tokens)[0]   
+    if check_defVar_todo == False:
+        return False
+
+    check_defProc_todo = check_defProc(tokens)[0]
+    if check_defProc_todo == False:
+        return False
+    
+    #corchetes defProc
+    
+    #corchetes normales
+    i = 0
+    while i < len(tokens):
+        #print(tokens[i:])
+
+        if tokens[i] == "{":
+            check_block_commands = blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens[i:])
+            print(check_block_commands,"eeeeeeeeeeeeeeee")
+            if check_block_commands[0] == False:
+                return False
+        i+=1
+
+    return True
+
+### Arreglar lo de la coma ###
+### cuando un comando es defproc susvariables solo pueden usarse en ese comando}
 ###arreglar { } que lo toma como true y tiene que haber algo adentro ### ( EN LA FUNCION GRANDE ) 
 ### cuando } no esta al final index out of range ###
 
-print(blockCommands(dict_nombres_proc,lista_variables_names,Directions,Orientations,num,tokens ), "comprobado block commands")
+
+print(funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens),"FINAAAL")
