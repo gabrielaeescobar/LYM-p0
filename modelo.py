@@ -3,15 +3,15 @@ from nltk.tokenize import word_tokenize, sent_tokenize, regexp_tokenize
 import cargar 
 nltk.download('punkt') 
 
-#texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
-#texto = texto_carga.lower()
+texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
+texto = texto_carga.lower()
 
-texto_prueba = " defVar nom 0 defProc putCB (c, b) { jump(3,1)} {walk(1); get(1); leap(1,left)} defProc goNorth (){while can(walk(1, north )) { walk(1, north )}} 20 defProc goWest(){if can(walk(1, west )) { walk(1, west )} else nop ()}".lower()
-#texto_prueba = "{walk(1); get(1); leap(1,left)} { get(1); leap(1,left)} walk(1,north)}" # solo mira 1 bracket
-
+#ACA ALGO FALLA texto = "{ drop (1) ; letGo (2) ; walk (1) ; while can( walk (1 , north )) { walk (1 , north )} }".lower()
+#LO ULTIMO NO SIRVE ACA texto = " defVar nom 0 defProc putCB (c, b) { jump(3,1)} {walk(1); get(1); leap(1,left)} defProc goNorth (){while can(walk(1, north )) { walk(1, north ) } { jump(3,4) } defproc gowest(){if can ( walk (1 , west ) ) { walk (1 , west )} else { nop () }}".lower()
 pattern = r'\w+|[.,(){};\[\]]|\S+'
+
 #pattern = r'\w+|,'
-tokens = regexp_tokenize(texto_prueba, pattern)
+tokens = regexp_tokenize(texto, pattern)
 print(tokens,"estos son los tokens")
 
 #Direcciones y orientaciones para comandos
@@ -74,9 +74,8 @@ print(check_defVar(tokens),"vaaaaaaaaaaaaaar")
 
 # Listas nombres y variables creadas defvar, salen de un dict
 dict_defVar = check_defVar(tokens)[1]
-lista_variables_creadas = dict_defVar.keys()
-print(lista_variables_creadas)
-lista_variables_values = dict_defVar.values()
+lista_variables_creadas = list(dict_defVar.keys())
+lista_variables_values = list(dict_defVar.values())
 
 #Funcion para defProc
 def check_defProc(tokens):
@@ -108,6 +107,57 @@ def check_defProc(tokens):
         i += 1
     return check ,dict_nombres  
 
+def verify_proc(tokens):
+    lista_variables_temporales_proc = []
+    check = True
+    checked_nombre = False
+    checked_parentesis = [False, False]
+
+    i = 1
+    while i < len(tokens):
+        token = tokens[i]
+        if not checked_nombre:
+            nombre = token
+            check = nombre_correcto(nombre)
+            checked_nombre = True
+
+        elif not checked_parentesis[0]:
+            parn_izq = token
+            if parn_izq != '(':
+                check = False
+            else:
+                checked_parentesis[0]=True  
+        
+
+        elif not checked_parentesis[1]:
+            if token == ')':
+                checked_parentesis[1] == True
+                return True, tokens[i:], lista_variables_temporales_proc
+            
+            elif len(tokens[i:])>=2:
+                if nombre_correcto(tokens[i]) == True and tokens[i+1] ==',':
+                    lista_variables_temporales_proc.append(tokens[i]) 
+
+                elif nombre_correcto(tokens[i]) == True and tokens[i+1] ==')':
+                    lista_variables_temporales_proc.append(tokens[i]) 
+                    checked_parentesis[1] == True
+                    i+=2
+                    return True, tokens[i:], lista_variables_temporales_proc
+                else: 
+                    
+                    check = False
+
+                i+=1 # SOLAMENTE PORQUE SON PAREJITAS
+
+        if check == False: 
+            return False, tokens[i:], lista_variables_temporales_proc
+        i+=1
+
+    check_final = checked_nombre and checked_parentesis[0] and checked_parentesis[1]
+    return check_final, tokens[i:], lista_variables_temporales_proc 
+
+
+
 print(check_defProc(tokens),"proccc")
 
 # Dict funciones creadas defProc
@@ -119,12 +169,13 @@ dict_nombres_proc = dict_nombres_proc_tupla[1]
 ### MIRAR COMO FUNCIONA ASSING VALUE ###
 def assign_Value(lista_variables_creadas,tokens):
     i = 0
+    se_asigno = False
     while i<len(tokens):
         if tokens[i] in lista_variables_creadas and tokens[i+1] == "=" and (tokens[i+2]).isdigit():
             dict_defVar[tokens[i]] = tokens[i+2]
+            se_asigno = True
         i+=1
-        return dict_defVar.values()
-
+    return se_asigno, list(dict_defVar.values())
 
 def Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens):
     '''
@@ -398,7 +449,7 @@ def RepeatTimes(dict_nombres_proc, lista_variables_creadas, Directions, Orientat
 def check_funciones_defProc(dict_nombres_proc, tokens):
     i = 0
     check = True
-    keys_dict_nombres_proc = dict_nombres_proc.keys()
+    keys_dict_nombres_proc = list(dict_nombres_proc.keys())
 
     while i < len(tokens):
         for key in keys_dict_nombres_proc:
@@ -407,17 +458,16 @@ def check_funciones_defProc(dict_nombres_proc, tokens):
                     check = False
 
             elif tokens[i] == key and dict_nombres_proc[key] == 3:
-                if not (tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')'):     #estructura que lleva 2 parametros
+                if not (tokens[i+1] == '(' and ((tokens[i+2]).isdigit() or (tokens[i+2] in lista_variables_creadas)) and tokens[i+3] == ')'):     #estructura que lleva 2 parametros
                     check = False
 
             elif tokens[i] == key and dict_nombres_proc[key] == 5:
-                if not(tokens[i+1] == '(' and ((tokens[i+2] in num) or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4] in Directions) or (tokens[i+4] in Orientations)) and tokens[i+5] == ')'):   #estructura que lleva 3 parametros 
+                print(tokens[i])
+                if not(tokens[i+1] == '(' and ((tokens[i+2]).isdigit() or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4]).isdigit() or (tokens[i+4]).isdigit()) and tokens[i+5] == ')'):   #estructura que lleva 3 parametros 
                     check = False
 
         i += 1  
     return check, tokens[i:]
-dict_nombres_proc = (check_defProc(tokens))[1]
-lista_variables_creadas = (check_defVar(tokens))[1]
 
 #Funcion para cada vez que aparezcan corchetes/ bloques de comandos
 def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens):
@@ -425,14 +475,18 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
     check = True
     se_cerro_corchete = False
     se_abrio_corchete = False
-    keys_dict_nombres_proc = dict_nombres_proc.keys()
+    keys_dict_nombres_proc = list(dict_nombres_proc.keys())
+
 
     if tokens[i] == "{":  ## debe hacerse con slize [i+1]
         se_abrio_corchete = True
         i+=1
         while i < len(tokens) :
-            #print ("tOKEN IS ", tokens[i])
-            if tokens[i] == "walk" or tokens[i] == "leap":
+           
+            if tokens[i] in lista_variables_creadas:
+                check, lista_variables_values = assign_Value(lista_variables_creadas,tokens[i:])
+
+            elif tokens[i] == "walk" or tokens[i] == "leap":
                 check, tokens= Walk_Leap (lista_variables_creadas, Directions, Orientations, num, tokens[i:])
                 i=0  
 
@@ -453,7 +507,7 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
                 check , tokens= Nop( tokens[i:])
                 i=0
             elif tokens[i] in keys_dict_nombres_proc: 
-                check, tokens= check_funciones_defProc(dict_nombres_proc, tokens[i:], lista_variables_creadas) 
+                check, tokens= check_funciones_defProc(dict_nombres_proc, tokens[i:]) 
                 i=0
 
             elif tokens[i] == "if":
@@ -469,15 +523,16 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
                 i=0
             
 
-            if (check == False):
+            if (check == False) or len(tokens)==0:
                 return False, []
             
             if ( tokens[i] != ";"):
-                #check = False , []
-                print(tokens[i], '  because of this')
+                check = False , []
+                #print(tokens[i], '  because of this')
                 break
             elif (tokens[i] == "}") :
-                print(f'breakie con check igual a {check} y mis tokens a actuales son {tokens}')
+                #print(f'breakie con check igual a {check} y mis tokens a actuales son {tokens}')
+                se_cerro_corchete = True
                 break
                 
 
@@ -488,13 +543,12 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
             return check, []
         
         if tokens[i] == "}":
-            tokens = tokens[i+1:]
+            tokens = tokens[i:]
             se_cerro_corchete = True
                 
        
-    
     check = check and se_cerro_corchete and se_abrio_corchete
-    return check, tokens
+    return check, tokens[i:]
 
 print(blockCommands(dict_nombres_proc,lista_variables_creadas,Directions,Orientations,num,tokens ), "comprobado block commands")
 
@@ -508,26 +562,50 @@ def funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions,
     if check_defProc_todo == False:
         return False
     
-    #corchetes defProc
-    
     #corchetes normales
     i = 0
     while i < len(tokens):
-        #print(tokens[i:])
 
-        if tokens[i] == "{":
-            check_block_commands = blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens[i:])
-            print(check_block_commands,"eeeeeeeeeeeeeeee")
-            if check_block_commands[0] == False:
+        if tokens[i] == 'defproc':
+            print('defproc inicio con estos tokens : ', tokens)
+            check_def_proc, tokens, lista_temporal_varaibles = verify_proc(tokens[i:])
+            i = 0 # REINICIAR CONTADOR CADA QUE SE RECIBE UN NUEVO TOKENS
+            if check_def_proc == False:
                 return False
+            else:
+                print('---------------------- tokens  --------------- ', tokens, '------------',lista_temporal_varaibles, lista_variables_creadas)
+                lista_temporal_varaibles.extend(lista_variables_creadas)
+                print(lista_temporal_varaibles)
+                check_block_commands, tokens = blockCommands(dict_nombres_proc, lista_temporal_varaibles  , Directions, Orientations, num, tokens[i:])
+                i = 0 # REINICIAR CONTADOR CADA QUE SE RECIBE UN NUEVO TOKENS
+                if check_block_commands == False:
+                    print('here 2', check_block_commands, tokens)
+                    return False
+            
+            
+        elif tokens[i] == "{":
+            if len(tokens) < 2 :
+                return False
+            
+            elif (tokens[i+1] == "}"):
+                return False
+            
+            check_block_commands, tokens = blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens[i:])
+            i = 1          # REINICIAR CONTADOR CADA QUE SE RECIBE UN NUEVO TOKENS 
+                            #(reinicia en 1 para omitir el corchete final)
+
+            if check_block_commands == False:
+                return False
+            elif len(tokens)>1:
+                if tokens[i] == "}": return False
+        elif tokens[i] == "}":
+
+            return False
         i+=1
 
     return True
 
-### Arreglar lo de la coma ###
-### cuando un comando es defproc susvariables solo pueden usarse en ese comando}
-###arreglar { } que lo toma como true y tiene que haber algo adentro ### ( EN LA FUNCION GRANDE ) 
-### cuando } no esta al final index out of range ###
+# EL USO DE UNA FUNCION DEFINIDA EN DEFPROC NO SE ESTA TOMANDO EN CUENTA ###
 
 
 print(funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens),"FINAAAL")
