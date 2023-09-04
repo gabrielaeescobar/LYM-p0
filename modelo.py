@@ -446,8 +446,10 @@ def check_funciones_defProc(dict_nombres_proc, tokens):
             elif tokens[i] == key and dict_nombres_proc[key] == 5:
                 if not(tokens[i+1] == '(' and ((tokens[i+2]).isdigit() or (tokens[i+2] in lista_variables_creadas)) and (tokens[i+3]== ',') and ((tokens[i+4]).isdigit() or (tokens[i+4]).isdigit()) and tokens[i+5] == ')'):   #estructura que lleva 3 parametros 
                     check = False
-
-        i += 1  
+        if tokens[i] == ")":
+            i+=1
+            break
+        i += 1
     return check, tokens[i:]
 
 dict_nombres_proc = check_defProc(tokens)[2]
@@ -488,7 +490,10 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
                 check , tokens= Nop( tokens[i:])
                 i=0
             elif tokens[i] in keys_dict_nombres_proc: 
+                print(f" This is {tokens[i]} and the whole tokens are: {tokens[i:]}")
                 check, tokens= check_funciones_defProc(dict_nombres_proc, tokens)
+                
+                print(f" {check} and the whole tokens are: {tokens}")
                 i=0
 
             elif tokens[i] == "if":
