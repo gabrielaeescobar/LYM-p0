@@ -7,7 +7,7 @@ texto_carga = cargar.openFile2(input("ingrese el filename (sin el .txt): "))
 texto = texto_carga.lower()
 
 #ACA ALGO FALLA texto = "{ drop (1) ; letGo (2) ; walk (1) ; while can( walk (1 , north )) { walk (1 , north )} }".lower()
-#LO ULTIMO NO SIRVE ACA texto = " defVar nom 0 defProc putCB (c, b) { jump(3,1)} {walk(1); get(1); leap(1,left)} defProc goNorth (){while can(walk(1, north )) { walk(1, north ) } { jump(3,4) } defproc gowest(){if can ( walk (1 , west ) ) { walk (1 , west )} else { nop () }}".lower()
+texto = " defVar nom 0 defProc putCB (c, b) { jump(3,1)} {walk(1); get(1); leap(1,left)}".lower()
 pattern = r'\w+|[.,(){};\[\]]|\S+'
 
 #pattern = r'\w+|,'
@@ -105,7 +105,7 @@ def check_defProc(tokens):
                     check = False
 
         i += 1
-    return check ,dict_nombres  
+    return check , tokens[i:], dict_nombres  
 
 def verify_proc(tokens):
     lista_variables_temporales_proc = []
@@ -162,7 +162,6 @@ print(check_defProc(tokens),"proccc")
 
 # Dict funciones creadas defProc
 dict_nombres_proc_tupla = check_defProc(tokens)
-dict_nombres_proc = dict_nombres_proc_tupla[1]
 
 #COMANDOS
 
@@ -469,6 +468,7 @@ def check_funciones_defProc(dict_nombres_proc, tokens):
         i += 1  
     return check, tokens[i:]
 
+dict_nombres_proc = check_defProc(tokens)[2]
 #Funcion para cada vez que aparezcan corchetes/ bloques de comandos
 def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0 
@@ -476,7 +476,6 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
     se_cerro_corchete = False
     se_abrio_corchete = False
     keys_dict_nombres_proc = list(dict_nombres_proc.keys())
-
 
     if tokens[i] == "{":  ## debe hacerse con slize [i+1]
         se_abrio_corchete = True
@@ -507,7 +506,7 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
                 check , tokens= Nop( tokens[i:])
                 i=0
             elif tokens[i] in keys_dict_nombres_proc: 
-                check, tokens= check_funciones_defProc(dict_nombres_proc, tokens[i:]) 
+                check, tokens= check_funciones_defProc(dict_nombres_proc, tokens)
                 i=0
 
             elif tokens[i] == "if":
