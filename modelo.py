@@ -308,23 +308,17 @@ def Can (Comandos, lista_variables_creadas, Directions, Orientations, num, token
                         sliced_tokens = (tokens[j:])
                         nuevo_inico = tokens[j+1]
                         if (nuevo_inico == 'walk') or (nuevo_inico == 'leap'):
-                            check=Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)[0]
-                            sliced_sliced = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens)[1]
+                            check, sliced_sliced = Walk_Leap (lista_variables_creadas, Directions, Orientations, num, sliced_tokens) 
                         elif (nuevo_inico == 'jump'):
-                            check= Jump (lista_variables_creadas, num, sliced_tokens)[0]
-                            sliced_sliced = Jump (lista_variables_creadas, num, sliced_tokens)[1]
+                            check, sliced_sliced = Jump (lista_variables_creadas, num, sliced_tokens)
                         elif (nuevo_inico == 'turn'):
-                            check= Turn (Directions, sliced_tokens)[0]
-                            sliced_sliced = Turn (Directions, sliced_tokens)[1]
+                            check,sliced_sliced = Turn (Directions, sliced_tokens)
                         elif (nuevo_inico == 'turnto'):
-                            check = TurnTo (Orientations, sliced_tokens)[0]
-                            sliced_sliced = TurnTo (Orientations, sliced_tokens)[1]
+                            check, sliced_sliced = TurnTo (Orientations, sliced_tokens)
                         elif (nuevo_inico == 'drop') or (nuevo_inico == 'get') or (nuevo_inico == 'grab') or (nuevo_inico == 'letgo'):
-                            check = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)[0]
-                            sliced_sliced = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)[1]
+                            check, sliced_sliced  = Drop_Get_Grab_LetGo (lista_variables_creadas, num, sliced_tokens)
                         elif (nuevo_inico == 'nop'):
-                            check= Nop(sliced_tokens)[0]
-                            sliced_sliced = Nop(sliced_tokens)[1]
+                            check, sliced_sliced= Nop(sliced_tokens)
                         else:
                             check = False, []
                         if check != True or sliced_sliced[0] != ')':
