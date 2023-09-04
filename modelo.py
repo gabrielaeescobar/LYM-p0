@@ -8,7 +8,6 @@ texto = texto_carga.lower()
 pattern = r'\w+|[.,(){};\[\]]|\S+'
 
 tokens = regexp_tokenize(texto, pattern)
-print(tokens,"estos son los tokens")
 
 #Direcciones y orientaciones para comandos
 Directions = ['front', 'right', 'left', 'back']
@@ -579,5 +578,7 @@ def funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions,
         i+=1
 
     return True
-
-print(funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens),"FINAAAL")
+print ('--------------------')
+print('Si es TRUE, el programa entrado por el usuario es correcto. Si es FALSE,el programa entrado por el usuario es incorrecto')
+print("EL PROGRAMA ES ",funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens))
+print ('--------------------')
