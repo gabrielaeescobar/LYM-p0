@@ -95,7 +95,7 @@ def check_defProc(tokens):
                     check = False
 
         i += 1
-    return check ,dict_nombres  
+    return check , tokens[i:], dict_nombres  
 
 def verify_proc(tokens):
     lista_variables_temporales_proc = []
@@ -148,7 +148,6 @@ def verify_proc(tokens):
 
 # Dict funciones creadas defProc
 dict_nombres_proc_tupla = check_defProc(tokens)
-dict_nombres_proc = dict_nombres_proc_tupla[1]
 
 #COMANDOS
 
@@ -452,6 +451,7 @@ def check_funciones_defProc(dict_nombres_proc, tokens):
         i += 1  
     return check, tokens[i:]
 
+dict_nombres_proc = check_defProc(tokens)[2]
 #Funcion para cada vez que aparezcan corchetes/ bloques de comandos
 def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens):
     i = 0 
@@ -459,7 +459,6 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
     se_cerro_corchete = False
     se_abrio_corchete = False
     keys_dict_nombres_proc = list(dict_nombres_proc.keys())
-
 
     if tokens[i] == "{":  ## debe hacerse con slize [i+1]
         se_abrio_corchete = True
@@ -490,7 +489,7 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
                 check , tokens= Nop( tokens[i:])
                 i=0
             elif tokens[i] in keys_dict_nombres_proc: 
-                check, tokens= check_funciones_defProc(dict_nombres_proc, tokens[i:]) 
+                check, tokens= check_funciones_defProc(dict_nombres_proc, tokens)
                 i=0
 
             elif tokens[i] == "if":
