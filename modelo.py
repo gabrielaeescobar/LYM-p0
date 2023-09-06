@@ -384,14 +384,18 @@ def If (dict_nombres_proc, lista_variables_creadas, Directions, Orientations, nu
             
             if sliced!= [] and check !=False and sliced[0] == '{':
                 check, ssliced = blockCommands(dict_nombres_proc,lista_variables_creadas,Directions,Orientations,num, sliced)
-                if ssliced !=[] and check!= False and ssliced[0] == 'else':
-                    check, sssliced = blockCommands(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, ssliced[1:])
-                    if check == True:
-                        return check, sssliced
+                if ssliced !=[] and check!= False:
+                    ssliced_0 = ssliced[1:]
+                    if ssliced_0[0] == 'else':
+                        check, sssliced = blockCommands(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, ssliced_0[1:])
+                        if check == True:
+                            return check, sssliced[1:]
+                        else:
+                            return False, []
                     else:
-                        return False, sssliced
+                        return False,[]
                 else:
-                    return False, sssliced
+                    return False, []
                 
             else:
                 return False, []
@@ -416,7 +420,7 @@ def While (dict_nombres_proc, lista_variables_creadas, Directions, Orientations,
             if sliced!= [] and check !=False and sliced[0] == '{':
                 check, sliced = blockCommands(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, sliced)
                 if check == True:
-                    return True, sliced
+                    return True, sliced[1:]
                 else:
                     return False, []
             else:
@@ -433,7 +437,7 @@ def RepeatTimes(dict_nombres_proc, lista_variables_creadas, Directions, Orientat
             elif (tokens[i+1] in num or tokens[i+1] in lista_variables_creadas) and tokens[i+2] == 'times' and tokens[i+3]== '{':
                 check, sliced = blockCommands(dict_nombres_proc, lista_variables_creadas, Directions, Orientations, num, tokens[i+3:])
                 if check == True:
-                    return True, sliced
+                    return True, sliced[1:]
                 else:
                     return False, []
             else:
