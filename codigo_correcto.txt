@@ -5,7 +5,9 @@ defProc putCB (c , b)
 {
     drop (c) ;
     letGo (b);
-    walk (1)
+    walk (1) ;
+    if can(walk(1, west)) { walk(1, west)} else {nop()};
+    putCB (1 ,1)
 }
 
 {
