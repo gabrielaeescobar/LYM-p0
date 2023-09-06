@@ -84,6 +84,7 @@ def check_defProc(tokens):
                 if (continuacion == ")"): # primer caso 0 parametros
                     check = True
                     dict_nombres[nombre] = 2
+                    break
                 elif (nombre_correcto(continuacion) and tokens[i+4] == ")"): # segundo caso 1 parametro
                     check = True
                     dict_nombres[nombre] = 3
@@ -460,7 +461,9 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
         i+=1
         while i < len(tokens) :
            
-            if tokens[i] in lista_variables_creadas:
+            if tokens[i] == "}":
+                return False, []
+            elif tokens[i] in lista_variables_creadas:
                 check, lista_variables_values = assign_Value(lista_variables_creadas,tokens[i:])
 
             elif tokens[i] == "walk" or tokens[i] == "leap":
@@ -484,10 +487,8 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
                 check , tokens= Nop( tokens[i:])
                 i=0
             elif tokens[i] in keys_dict_nombres_proc: 
-                print(f" This is {tokens[i]} and the whole tokens are: {tokens[i:]}")
                 check, tokens= check_funciones_defProc(dict_nombres_proc, tokens)
                 
-                print(f" {check} and the whole tokens are: {tokens}")
                 i=0
 
             elif tokens[i] == "if":
@@ -505,14 +506,13 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
 
             if (check == False) or len(tokens)==0:
                 return False, []
-            
-            if ( tokens[i] != ";"):
-                check = False , []
-                break
+                
             elif (tokens[i] == "}") :
                 se_cerro_corchete = True
                 break
-                
+            
+            elif ( tokens[i] != ";"):
+                return False, [] 
 
 
             i+=1
@@ -546,6 +546,8 @@ def funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions,
         if tokens[i] == 'defproc':
             check_def_proc, tokens, lista_temporal_varaibles = verify_proc(tokens[i:])
             i = 0 # REINICIAR CONTADOR CADA QUE SE RECIBE UN NUEVO TOKENS
+            if tokens[i] == ')':
+                i+=1
             if check_def_proc == False:
                 return False
             else:
@@ -566,13 +568,14 @@ def funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions,
             check_block_commands, tokens = blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens[i:])
             i = 1          # REINICIAR CONTADOR CADA QUE SE RECIBE UN NUEVO TOKENS 
                             #(reinicia en 1 para omitir el corchete final)
-
             if check_block_commands == False:
                 return False
             elif len(tokens)>1:
-                if tokens[i] == "}": return False
+                if tokens[i] == "}": 
+                    return False
+            continue
+            
         elif tokens[i] == "}":
-
             return False
         i+=1
 

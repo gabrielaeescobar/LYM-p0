@@ -1,3 +1,6 @@
+
+defVar n 0
+
 defProc putCB (c , b)
 {
     drop (c) ;
@@ -9,3 +12,12 @@ defProc putCB (c , b)
 jump (3 ,3) ;
 putCB (2 ,1)
 }
+
+defProc goNorth ()
+{
+   putCB (1 ,1)
+ }
+
+ {
+    goNorth ()
+ }
