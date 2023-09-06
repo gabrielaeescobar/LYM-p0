@@ -95,6 +95,8 @@ def check_defProc(tokens):
                 if (continuacion == ")"): # primer caso 0 parametros
                     check = True
                     dict_nombres[nombre] = 2
+                    print("BREAKEEE")
+                    break
                 elif (nombre_correcto(continuacion) and tokens[i+4] == ")"): # segundo caso 1 parametro
                     check = True
                     dict_nombres[nombre] = 3
@@ -474,11 +476,14 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
     keys_dict_nombres_proc = list(dict_nombres_proc.keys())
 
     if tokens[i] == "{":  ## debe hacerse con slize [i+1]
+        print('--------------ABRI CORCHETES-----------------\n',tokens,"\n")
         se_abrio_corchete = True
         i+=1
         while i < len(tokens) :
            
-            if tokens[i] in lista_variables_creadas:
+            if tokens[i] == "}":
+                return False, []
+            elif tokens[i] in lista_variables_creadas:
                 check, lista_variables_values = assign_Value(lista_variables_creadas,tokens[i:])
 
             elif tokens[i] == "walk" or tokens[i] == "leap":
@@ -523,16 +528,16 @@ def blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orienta
 
             if (check == False) or len(tokens)==0:
                 return False, []
-            
-            if ( tokens[i] != ";"):
-                check = False , []
-                #print(tokens[i], '  because of this')
-                break
+                
             elif (tokens[i] == "}") :
                 #print(f'breakie con check igual a {check} y mis tokens a actuales son {tokens}')
+                print(tokens[i], '  because of this bbbbbbb' )
                 se_cerro_corchete = True
                 break
-                
+            
+            elif ( tokens[i] != ";"):
+                print(tokens[i], '  because of this')
+                return False, [] 
 
 
             i+=1
@@ -568,6 +573,8 @@ def funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions,
             print('defproc inicio con estos tokens : ', tokens)
             check_def_proc, tokens, lista_temporal_varaibles = verify_proc(tokens[i:])
             i = 0 # REINICIAR CONTADOR CADA QUE SE RECIBE UN NUEVO TOKENS
+            if tokens[i] == ')':
+                i+=1
             if check_def_proc == False:
                 return False
             else:
@@ -582,6 +589,7 @@ def funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions,
             
             
         elif tokens[i] == "{":
+            print('-------------------AGAIN HERE-----------', tokens[i:])
             if len(tokens) < 2 :
                 return False
             
@@ -591,13 +599,16 @@ def funcion_todo_programa(dict_nombres_proc,lista_variables_creadas, Directions,
             check_block_commands, tokens = blockCommands(dict_nombres_proc,lista_variables_creadas, Directions, Orientations, num, tokens[i:])
             i = 1          # REINICIAR CONTADOR CADA QUE SE RECIBE UN NUEVO TOKENS 
                             #(reinicia en 1 para omitir el corchete final)
-
+            print('---------------------HERE----------------',check_block_commands,"\n",tokens[i:],"\n")
             if check_block_commands == False:
                 return False
             elif len(tokens)>1:
-                if tokens[i] == "}": return False
+                if tokens[i] == "}": 
+                    return False
+            continue
+            
         elif tokens[i] == "}":
-
+            print('SHIIIIT', tokens, i)
             return False
         i+=1
 
